@@ -1,7 +1,7 @@
 import { LightningElement, api, wire } from 'lwc';
 import { getRecord, getFieldValue } from 'lightning/uiRecordApi';
 import LightningModal from 'lightning/modal';
-import API_UPDATED_FIELD from '@salesforce/schema/Opportunity.API_Updated_Field__c';
+import API_UPDATED_FIELD from '@salesforce/schema/Opportunity.API_Updated_Field';
 import NAME_FIELD from '@salesforce/schema/Opportunity.Name';
 import AMOUNT_FIELD from '@salesforce/schema/Opportunity.Amount';
 import CLOSEDATE_FIELD from '@salesforce/schema/Opportunity.CloseDate';
@@ -37,6 +37,7 @@ export default class OpportunityWebhookSection extends LightningElement {
     get opportunityFields() {
         if (!this.opportunity) return [];
         return [
+            { label: 'API Updated Field', value: getFieldValue(this.opportunity, API_UPDATED_FIELD) },
             { label: 'Name', value: getFieldValue(this.opportunity, NAME_FIELD) },
             { label: 'Amount', value: getFieldValue(this.opportunity, AMOUNT_FIELD) },
             { label: 'Close Date', value: getFieldValue(this.opportunity, CLOSEDATE_FIELD) },
