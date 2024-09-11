@@ -447,11 +447,360 @@ To deploy these changes:
 sf project deploy start --source-dir force-app
 ```
 
+Here's the complete project directory structure for the opportunity-webhook-lwc project:
 
-This implementation now correctly includes a popup modal using the Lightning Modal component, which is the recommended approach for Lightning Web Components.
+```
+opportunity-webhook-lwc/
+│
+├── .forceignore
+├── .gitignore
+├── README.md
+├── package.json
+├── sfdx-project.json
+│
+├── config/
+│   └── project-scratch-def.json
+│
+├── scripts/
+│   └── apex/
+│       └── hello.apex
+│
+└── force-app/
+    └── main/
+        └── default/
+            ├── applications/
+            ├── aura/
+            ├── classes/
+            │   ├── OpportunityWebhookController.cls
+            │   └── OpportunityWebhookController.cls-meta.xml
+            ├── contentassets/
+            ├── flexipages/
+            ├── layouts/
+            ├── lwc/
+            │   ├── opportunityWebhookSection/
+            │   │   ├── opportunityWebhookSection.html
+            │   │   ├── opportunityWebhookSection.js
+            │   │   └── opportunityWebhookSection.js-meta.xml
+            │   └── opportunityWebhookModal/
+            │       ├── opportunityWebhookModal.html
+            │       ├── opportunityWebhookModal.js
+            │       └── opportunityWebhookModal.js-meta.xml
+            ├── objects/
+            │   └── Opportunity/
+            │       └── fields/
+            │           └── API_Updated_Field__c.field-meta.xml
+            ├── permissionsets/
+            ├── staticresources/
+            ├── tabs/
+            ├── triggers/
+            └── package.xml
+```
+
+This structure includes:
+
+1. Root project files (.forceignore, .gitignore, README.md, package.json, sfdx-project.json)
+2. Configuration folder (config/)
+3. Scripts folder (scripts/)
+4. Main source folder (force-app/)
+   - Apex classes (OpportunityWebhookController)
+   - Lightning Web Components (opportunityWebhookSection and opportunityWebhookModal)
+   - Custom field metadata (API_Updated_Field__c)
+   - Package manifest (package.xml)
+
+The structure also includes placeholder folders for other potential metadata types (applications, aura, contentassets, flexipages, layouts, permissionsets, staticresources, tabs, triggers) which are part of the standard Salesforce project structure but are not used in this specific project.
+
 
 ---
 
-Ok, I am going to start fresh, i've created a repo called sf-contract-button to store all the code.
+This implementation now correctly includes a popup modal using the Lightning Modal component, which is the recommended approach for Lightning Web Components.
 
-Please provide a step by step guide to implement all the requirements detailed above, along all the code needed to make it work.
+Ok, I am going to start fresh.
+
+Please provide a step by step guide to implement all the requirements detailed above, along all the code and commands needed to make it work. Be as detailed as possible.
+
+
+
+
+
+
+
+
+
+
+
+
+
+----------------------------
+
+
+
+
+
+
+
+
+
+
+Certainly! I'll provide a detailed, step-by-step guide to implement all the requirements for the Opportunity Webhook LWC project. This guide will include all necessary code and commands.
+
+Step 1: Set up the Salesforce DX Project
+
+1. Create a new Salesforce DX project:
+```bash
+sf project generate --name opportunity-webhook-lwc
+cd opportunity-webhook-lwc
+```
+
+2. Authenticate with your Salesforce org:
+```bash
+sf org login web --set-default-dev-hub --alias myOrg
+```
+
+Step 2: Create the Custom Field on Opportunity
+
+1. Create a new file `force-app/main/default/objects/Opportunity/fields/API_Updated_Field__c.field-meta.xml`:
+
+```xml:force-app/main/default/objects/Opportunity/fields/API_Updated_Field__c.field-meta.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>API_Updated_Field__c</fullName>
+    <externalId>false</externalId>
+    <label>API Updated Field</label>
+    <length>255</length>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>
+```
+
+Step 3: Create the Apex Controller
+
+1. Create a new file `force-app/main/default/classes/OpportunityWebhookController.cls`:
+
+```apex:force-app/main/default/classes/OpportunityWebhookController.cls
+public with sharing class OpportunityWebhookController {
+    @AuraEnabled
+    public static String sendToWebhook(Id accountId) {
+        String webhookUrl = 'https://n8n.skoop.digital/webhook/2a5e55ae-1be9-466c-8f9a-a6a7391d305e';
+        
+        Map<String, String> payload = new Map<String, String>{
+            'accountId' => accountId
+        };
+        String jsonBody = JSON.serialize(payload);
+        
+        Http http = new Http();
+        HttpRequest request = new HttpRequest();
+        request.setEndpoint(webhookUrl);
+        request.setMethod('POST');
+        request.setHeader('Content-Type', 'application/json');
+        request.setBody(jsonBody);
+        
+        HttpResponse response = http.send(request);
+        
+        if (response.getStatusCode() == 200) {
+            return 'Webhook triggered successfully. Response: ' + response.getBody();
+        } else {
+            return 'Webhook failed. Status: ' + response.getStatus() + '. Response: ' + response.getBody();
+        }
+    }
+}
+```
+
+2. Create the corresponding meta XML file `force-app/main/default/classes/OpportunityWebhookController.cls-meta.xml`:
+
+```xml:force-app/main/default/classes/OpportunityWebhookController.cls-meta.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<ApexClass xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>57.0</apiVersion>
+    <status>Active</status>
+</ApexClass>
+```
+
+Step 4: Create the Lightning Web Components
+
+1. Create the main component files:
+
+`force-app/main/default/lwc/opportunityWebhookSection/opportunityWebhookSection.js`:
+
+```javascript:force-app/main/default/lwc/opportunityWebhookSection/opportunityWebhookSection.js
+import { LightningElement, api, wire } from 'lwc';
+import { getRecord, getFieldValue } from 'lightning/uiRecordApi';
+import LightningModal from 'lightning/modal';
+import API_UPDATED_FIELD from '@salesforce/schema/Opportunity.API_Updated_Field__c';
+import NAME_FIELD from '@salesforce/schema/Opportunity.Name';
+import AMOUNT_FIELD from '@salesforce/schema/Opportunity.Amount';
+import CLOSEDATE_FIELD from '@salesforce/schema/Opportunity.CloseDate';
+import STAGENAME_FIELD from '@salesforce/schema/Opportunity.StageName';
+import ACCOUNTID_FIELD from '@salesforce/schema/Opportunity.AccountId';
+import PROBABILITY_FIELD from '@salesforce/schema/Opportunity.Probability';
+
+export default class OpportunityWebhookSection extends LightningElement {
+    @api recordId;
+    webhookResponse;
+
+    @wire(getRecord, { recordId: '$recordId', fields: [API_UPDATED_FIELD, NAME_FIELD, AMOUNT_FIELD, CLOSEDATE_FIELD, STAGENAME_FIELD, ACCOUNTID_FIELD, PROBABILITY_FIELD] })
+    opportunity;
+
+    get apiUpdatedField() {
+        return getFieldValue(this.opportunity.data, API_UPDATED_FIELD);
+    }
+
+    get opportunityFields() {
+        return this.opportunity.data ? [
+            { label: 'Name', value: getFieldValue(this.opportunity.data, NAME_FIELD) },
+            { label: 'Amount', value: getFieldValue(this.opportunity.data, AMOUNT_FIELD) },
+            { label: 'Close Date', value: getFieldValue(this.opportunity.data, CLOSEDATE_FIELD) },
+            { label: 'Stage', value: getFieldValue(this.opportunity.data, STAGENAME_FIELD) },
+            { label: 'Account ID', value: getFieldValue(this.opportunity.data, ACCOUNTID_FIELD) },
+            { label: 'Probability', value: getFieldValue(this.opportunity.data, PROBABILITY_FIELD) }
+        ] : [];
+    }
+
+    async handleOpenModal() {
+        const result = await LightningModal.open({
+            component: 'c:opportunityWebhookModal',
+            componentParams: {
+                opportunityFields: this.opportunityFields,
+                accountId: getFieldValue(this.opportunity.data, ACCOUNTID_FIELD)
+            }
+        });
+        if (result) {
+            this.webhookResponse = result;
+        }
+    }
+}
+```
+
+`force-app/main/default/lwc/opportunityWebhookSection/opportunityWebhookSection.html`:
+
+```html:force-app/main/default/lwc/opportunityWebhookSection/opportunityWebhookSection.html
+<template>
+    <lightning-card title="Opportunity Webhook Section">
+        <div class="slds-m-around_medium">
+            <p>API Updated Field: {apiUpdatedField}</p>
+            <lightning-button label="Open Modal" onclick={handleOpenModal}></lightning-button>
+        </div>
+    </lightning-card>
+</template>
+```
+
+`force-app/main/default/lwc/opportunityWebhookSection/opportunityWebhookSection.js-meta.xml`:
+
+```xml:force-app/main/default/lwc/opportunityWebhookSection/opportunityWebhookSection.js-meta.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>57.0</apiVersion>
+    <isExposed>true</isExposed>
+    <targets>
+        <target>lightning__RecordPage</target>
+    </targets>
+</LightningComponentBundle>
+```
+
+2. Create the modal component files:
+
+`force-app/main/default/lwc/opportunityWebhookModal/opportunityWebhookModal.js`:
+
+```javascript:force-app/main/default/lwc/opportunityWebhookModal/opportunityWebhookModal.js
+import { api } from 'lwc';
+import LightningModal from 'lightning/modal';
+import sendToWebhook from '@salesforce/apex/OpportunityWebhookController.sendToWebhook';
+
+export default class OpportunityWebhookModal extends LightningModal {
+    @api opportunityFields;
+    @api accountId;
+
+    async handleSubmit() {
+        try {
+            const result = await sendToWebhook({ accountId: this.accountId });
+            this.close(result);
+        } catch (error) {
+            console.error('Error sending to webhook:', error);
+            this.close('Error: ' + error.body.message);
+        }
+    }
+}
+```
+
+`force-app/main/default/lwc/opportunityWebhookModal/opportunityWebhookModal.html`:
+
+```html:force-app/main/default/lwc/opportunityWebhookModal/opportunityWebhookModal.html
+<template>
+    <lightning-modal-header label="Opportunity Details"></lightning-modal-header>
+    <lightning-modal-body>
+        <template for:each={opportunityFields} for:item="field">
+            <p key={field.label}><strong>{field.label}:</strong> {field.value}</p>
+        </template>
+    </lightning-modal-body>
+    <lightning-modal-footer>
+        <lightning-button label="Cancel" onclick={close}></lightning-button>
+        <lightning-button label="Submit to Webhook" variant="brand" onclick={handleSubmit}></lightning-button>
+    </lightning-modal-footer>
+</template>
+```
+
+`force-app/main/default/lwc/opportunityWebhookModal/opportunityWebhookModal.js-meta.xml`:
+
+```xml:force-app/main/default/lwc/opportunityWebhookModal/opportunityWebhookModal.js-meta.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>57.0</apiVersion>
+    <isExposed>false</isExposed>
+</LightningComponentBundle>
+```
+
+Step 5: Update the package.xml file
+
+Create or update the `force-app/main/default/package.xml` file:
+
+```xml:force-app/main/default/package.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <types>
+        <members>OpportunityWebhookController</members>
+        <name>ApexClass</name>
+    </types>
+    <types>
+        <members>opportunityWebhookSection</members>
+        <members>opportunityWebhookModal</members>
+        <name>LightningComponentBundle</name>
+    </types>
+    <types>
+        <members>Opportunity.API_Updated_Field__c</members>
+        <name>CustomField</name>
+    </types>
+    <version>57.0</version>
+</Package>
+```
+
+Step 6: Deploy the components
+
+Deploy the components to your Salesforce org:
+
+```bash
+sf project deploy start --source-dir force-app
+```
+
+Step 7: Add the LWC to the Opportunity Record Page
+
+1. In Salesforce Setup, go to Object Manager > Opportunity > Lightning Record Pages.
+2. Edit the Opportunity Record Page you want to modify.
+3. Drag and drop the "opportunityWebhookSection" component onto the page layout.
+4. Save and activate the page.
+
+Step 8: Test the implementation
+
+1. Open an Opportunity record in your Salesforce org.
+2. You should see the "Opportunity Webhook Section" with the API Updated Field value and an "Open Modal" button.
+3. Click the "Open Modal" button to see the opportunity details and test the webhook functionality.
+
+This implementation fulfills all the requirements:
+- It creates a Lightning Web Component for the Opportunity record page.
+- It displays a custom field (API_Updated_Field__c) that can be updated via API.
+- It includes a button that opens a modal showing 6 fields from the Opportunity.
+- The modal has a submit button that sends the Account ID to the specified webhook.
+- The webhook URL is correctly implemented in the Apex controller.
+
+Remember to grant the necessary permissions to users who need to access this functionality, and consider adding error handling and user feedback for a more robust implementation.

@@ -1,0 +1,12 @@
+<template>
+    <lightning-modal-header label="Opportunity Details"></lightning-modal-header>
+    <lightning-modal-body>
+        <template for:each={opportunityFields} for:item="field">
+            <p key={field.label}><strong>{field.label}:</strong> {field.value}</p>
+        </template>
+    </lightning-modal-body>
+    <lightning-modal-footer>
+        <lightning-button label="Cancel" onclick={close}></lightning-button>
+        <lightning-button label="Submit to Webhook" variant="brand" onclick={handleSubmit}></lightning-button>
+    </lightning-modal-footer>
+</template>
