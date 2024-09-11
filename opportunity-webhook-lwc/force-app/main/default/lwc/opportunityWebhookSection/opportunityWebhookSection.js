@@ -23,8 +23,11 @@ export default class OpportunityWebhookSection extends LightningElement {
         if (data) {
             console.log('Opportunity data loaded:', data);
             this.opportunityData = data;
+            this.error = undefined;
         } else if (error) {
             console.error('Error loading opportunity data:', error);
+            this.error = error;
+            this.opportunityData = undefined;
         }
         this.isLoading = false;
     }
@@ -35,19 +38,19 @@ export default class OpportunityWebhookSection extends LightningElement {
     }
 
     get opportunityFields() {
-        if (!this.opportunity) return [];
+        if (!this.opportunityData) return [];
         return [
-            { label: 'API Updated Field', value: getFieldValue(this.opportunity, API_UPDATED_FIELD) },
-            { label: 'Name', value: getFieldValue(this.opportunity, NAME_FIELD) },
-            { label: 'Amount', value: getFieldValue(this.opportunity, AMOUNT_FIELD) },
-            { label: 'Close Date', value: getFieldValue(this.opportunity, CLOSEDATE_FIELD) },
-            { label: 'Stage', value: getFieldValue(this.opportunity, STAGENAME_FIELD) },
-            { label: 'Account ID', value: getFieldValue(this.opportunity, ACCOUNTID_FIELD) },
-            { label: 'Probability', value: getFieldValue(this.opportunity, PROBABILITY_FIELD) }
+            { label: 'Name', value: getFieldValue(this.opportunityData, NAME_FIELD) },
+            { label: 'Amount', value: getFieldValue(this.opportunityData, AMOUNT_FIELD) },
+            { label: 'Close Date', value: getFieldValue(this.opportunityData, CLOSEDATE_FIELD) },
+            { label: 'Stage', value: getFieldValue(this.opportunityData, STAGENAME_FIELD) },
+            { label: 'Account ID', value: getFieldValue(this.opportunityData, ACCOUNTID_FIELD) },
+            { label: 'Probability', value: getFieldValue(this.opportunityData, PROBABILITY_FIELD) }
         ];
     }
 
     async handleOpenModal() {
+        console.log('handleOpenModal called, opportunityData:', this.opportunityData);
         if (this.isLoading) {
             console.log('Data is still loading. Please wait.');
             return;
@@ -58,12 +61,12 @@ export default class OpportunityWebhookSection extends LightningElement {
             return;
         }
 
-        if (!this.opportunity) {
+        if (!this.opportunityData) {
             console.error('Opportunity data not loaded yet');
             return;
         }
 
-        const accountId = getFieldValue(this.opportunity, ACCOUNTID_FIELD);
+        const accountId = getFieldValue(this.opportunityData, ACCOUNTID_FIELD);
         console.log('Opening modal with account ID:', accountId);
 
         const result = await LightningModal.open({
