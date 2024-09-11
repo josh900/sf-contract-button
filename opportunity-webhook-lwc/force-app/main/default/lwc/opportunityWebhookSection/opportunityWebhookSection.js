@@ -6,13 +6,21 @@ import ACCOUNTID_FIELD from '@salesforce/schema/Opportunity.AccountId';
 import OPPORTUNITY_ID_FIELD from '@salesforce/schema/Opportunity.Id';
 
 export default class OpportunityWebhookSection extends LightningElement {
-    @api recordId;
+    @api
+    set recordId(value) {
+        console.log('recordId set:', value);
+        this._recordId = value;
+    }
+    get recordId() {
+        return this._recordId;
+    }
     webhookResponse;
     opportunityData;
 
     @wire(getRecord, { recordId: '$recordId', fields: [API_UPDATED_FIELD, ACCOUNTID_FIELD, OPPORTUNITY_ID_FIELD] })
     wiredOpportunity({ error, data }) {
         if (data) {
+            console.log('Opportunity data loaded:', data);
             this.opportunityData = data;
         } else if (error) {
             console.error('Error loading opportunity data:', error);
@@ -20,10 +28,12 @@ export default class OpportunityWebhookSection extends LightningElement {
     }
 
     get apiUpdatedField() {
+        console.log('Getting apiUpdatedField, opportunityData:', this.opportunityData);
         return this.opportunityData ? getFieldValue(this.opportunityData, API_UPDATED_FIELD) : '';
     }
 
     async handleOpenModal() {
+        console.log('handleOpenModal called, opportunityData:', this.opportunityData);
         if (!this.opportunityData) {
             console.error('Opportunity data not loaded yet');
             return;
@@ -43,6 +53,7 @@ export default class OpportunityWebhookSection extends LightningElement {
             component: 'c:opportunityWebhookModal',
             componentParams: {
                 accountId: accountId || opportunityId,
+                
                 isOpportunityId: !accountId
             },
             label: 'Opportunity Details'
