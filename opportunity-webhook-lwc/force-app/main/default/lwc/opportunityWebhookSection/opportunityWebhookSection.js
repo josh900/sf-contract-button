@@ -68,7 +68,8 @@ export default class OpportunityWebhookSection extends LightningElement {
             componentParams: {
                 opportunityFields: this.opportunityFields,
                 accountId: accountId
-            }
+            },
+            label: 'Opportunity Details'
         });
         if (result) {
             this.webhookResponse = result;
