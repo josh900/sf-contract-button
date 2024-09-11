@@ -1,7 +1,6 @@
 import { LightningElement, api, wire } from 'lwc';
 import { getRecord, getFieldValue } from 'lightning/uiRecordApi';
 import LightningModal from 'lightning/modal';
-import API_UPDATED_FIELD from '@salesforce/schema/Opportunity.API_Updated_Field__c';
 import NAME_FIELD from '@salesforce/schema/Opportunity.Name';
 import AMOUNT_FIELD from '@salesforce/schema/Opportunity.Amount';
 import CLOSEDATE_FIELD from '@salesforce/schema/Opportunity.CloseDate';
@@ -17,7 +16,7 @@ export default class OpportunityWebhookSection extends LightningElement {
 
     @wire(getRecord, { 
         recordId: '$recordId', 
-        fields: [API_UPDATED_FIELD, NAME_FIELD, AMOUNT_FIELD, CLOSEDATE_FIELD, STAGENAME_FIELD, ACCOUNTID_FIELD, PROBABILITY_FIELD] 
+        fields: [NAME_FIELD, AMOUNT_FIELD, CLOSEDATE_FIELD, STAGENAME_FIELD, ACCOUNTID_FIELD, PROBABILITY_FIELD] 
     })
     wiredOpportunity({ error, data }) {
         if (data) {
@@ -30,11 +29,6 @@ export default class OpportunityWebhookSection extends LightningElement {
             this.opportunityData = undefined;
         }
         this.isLoading = false;
-    }
-
-    get apiUpdatedField() {
-        console.log('Getting apiUpdatedField, opportunityData:', this.opportunityData);
-        return this.opportunityData ? getFieldValue(this.opportunityData, API_UPDATED_FIELD) : '';
     }
 
     get opportunityFields() {

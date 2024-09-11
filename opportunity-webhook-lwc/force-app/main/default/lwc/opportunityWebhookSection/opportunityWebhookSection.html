@@ -9,7 +9,6 @@
                     <p>Error: {error.body.message}</p>
                 </template>
                 <template if:false={error}>
-                    <p>API Updated Field: {apiUpdatedField}</p>
                     <lightning-button label="Open Modal" onclick={handleOpenModal}></lightning-button>
                 </template>
             </template>
