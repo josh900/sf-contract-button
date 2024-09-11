@@ -4,6 +4,7 @@ import getWebhookData from '@salesforce/apex/OpportunityWebhookController.getWeb
 
 export default class OpportunityWebhookModal extends LightningModal {
     @api accountId;
+    @api isOpportunityId = false;
     @track isLoading = true;
     @track htmlContent;
 
@@ -13,8 +14,12 @@ export default class OpportunityWebhookModal extends LightningModal {
 
     async fetchWebhookData() {
         try {
-            console.log('Fetching webhook data for account ID:', this.accountId);
-            const result = await getWebhookData({ accountId: this.accountId });
+            const idType = this.isOpportunityId ? 'Opportunity' : 'Account';
+            console.log(`Fetching webhook data for ${idType} ID:`, this.accountId);
+            const result = await getWebhookData({ 
+                id: this.accountId, 
+                isOpportunityId: this.isOpportunityId 
+            });
             console.log('Webhook data received:', result);
             this.htmlContent = result;
             this.isLoading = false;
