@@ -29,7 +29,7 @@ private class OpportunityWebhookControllerTest {
 
         // Call the method to test
         Test.startTest();
-        String result = OpportunityWebhookController.getWebhookData(testAccount.Id);
+        String result = OpportunityWebhookController.getWebhookData(testAccount.Id, false);
         Test.stopTest();
 
         // Verify the results
