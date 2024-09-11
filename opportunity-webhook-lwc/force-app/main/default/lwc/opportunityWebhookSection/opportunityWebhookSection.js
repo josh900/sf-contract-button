@@ -2,61 +2,75 @@ import { LightningElement, api, wire } from 'lwc';
 import { getRecord, getFieldValue } from 'lightning/uiRecordApi';
 import LightningModal from 'lightning/modal';
 import API_UPDATED_FIELD from '@salesforce/schema/Opportunity.API_Updated_Field__c';
+import NAME_FIELD from '@salesforce/schema/Opportunity.Name';
+import AMOUNT_FIELD from '@salesforce/schema/Opportunity.Amount';
+import CLOSEDATE_FIELD from '@salesforce/schema/Opportunity.CloseDate';
+import STAGENAME_FIELD from '@salesforce/schema/Opportunity.StageName';
 import ACCOUNTID_FIELD from '@salesforce/schema/Opportunity.AccountId';
-import OPPORTUNITY_ID_FIELD from '@salesforce/schema/Opportunity.Id';
+import PROBABILITY_FIELD from '@salesforce/schema/Opportunity.Probability';
 
 export default class OpportunityWebhookSection extends LightningElement {
-    @api
-    set recordId(value) {
-        console.log('recordId set:', value);
-        this._recordId = value;
-    }
-    get recordId() {
-        return this._recordId;
-    }
+    @api recordId;
     webhookResponse;
-    opportunityData;
+    error;
+    isLoading = true;
 
-    @wire(getRecord, { recordId: '$recordId', fields: [API_UPDATED_FIELD, ACCOUNTID_FIELD, OPPORTUNITY_ID_FIELD] })
+    @wire(getRecord, { 
+        recordId: '$recordId', 
+        fields: [API_UPDATED_FIELD, NAME_FIELD, AMOUNT_FIELD, CLOSEDATE_FIELD, STAGENAME_FIELD, ACCOUNTID_FIELD, PROBABILITY_FIELD] 
+    })
     wiredOpportunity({ error, data }) {
         if (data) {
-            console.log('Opportunity data loaded:', data);
-            this.opportunityData = data;
+            this.opportunity = data;
+            this.error = undefined;
         } else if (error) {
-            console.error('Error loading opportunity data:', error);
+            this.error = error;
+            this.opportunity = undefined;
         }
+        this.isLoading = false;
     }
 
     get apiUpdatedField() {
-        console.log('Getting apiUpdatedField, opportunityData:', this.opportunityData);
-        return this.opportunityData ? getFieldValue(this.opportunityData, API_UPDATED_FIELD) : '';
+        return this.opportunity ? getFieldValue(this.opportunity, API_UPDATED_FIELD) : '';
+    }
+
+    get opportunityFields() {
+        if (!this.opportunity) return [];
+        return [
+            { label: 'Name', value: getFieldValue(this.opportunity, NAME_FIELD) },
+            { label: 'Amount', value: getFieldValue(this.opportunity, AMOUNT_FIELD) },
+            { label: 'Close Date', value: getFieldValue(this.opportunity, CLOSEDATE_FIELD) },
+            { label: 'Stage', value: getFieldValue(this.opportunity, STAGENAME_FIELD) },
+            { label: 'Account ID', value: getFieldValue(this.opportunity, ACCOUNTID_FIELD) },
+            { label: 'Probability', value: getFieldValue(this.opportunity, PROBABILITY_FIELD) }
+        ];
     }
 
     async handleOpenModal() {
-        console.log('handleOpenModal called, opportunityData:', this.opportunityData);
-        if (!this.opportunityData) {
+        if (this.isLoading) {
+            console.log('Data is still loading. Please wait.');
+            return;
+        }
+
+        if (this.error) {
+            console.error('Error loading opportunity data:', this.error);
+            return;
+        }
+
+        if (!this.opportunity) {
             console.error('Opportunity data not loaded yet');
             return;
         }
 
-        const accountId = getFieldValue(this.opportunityData, ACCOUNTID_FIELD);
-        const opportunityId = getFieldValue(this.opportunityData, OPPORTUNITY_ID_FIELD);
+        const accountId = getFieldValue(this.opportunity, ACCOUNTID_FIELD);
         console.log('Opening modal with account ID:', accountId);
-        console.log('Opportunity ID:', opportunityId);
-
-        if (!accountId && !opportunityId) {
-            console.error('Neither Account ID nor Opportunity ID available');
-            return;
-        }
 
         const result = await LightningModal.open({
             component: 'c:opportunityWebhookModal',
             componentParams: {
-                accountId: accountId || opportunityId,
-                
-                isOpportunityId: !accountId
-            },
-            label: 'Opportunity Details'
+                opportunityFields: this.opportunityFields,
+                accountId: accountId
+            }
         });
         if (result) {
             this.webhookResponse = result;

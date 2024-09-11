@@ -1,8 +1,18 @@
 <template>
     <lightning-card title="Opportunity Webhook Section">
         <div class="slds-m-around_medium">
-            <p>API Updated Field: {apiUpdatedField}</p>
-            <lightning-button label="Open Modal" onclick={handleOpenModal}></lightning-button>
+            <template if:true={isLoading}>
+                <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+            </template>
+            <template if:false={isLoading}>
+                <template if:true={error}>
+                    <p>Error: {error.body.message}</p>
+                </template>
+                <template if:false={error}>
+                    <p>API Updated Field: {apiUpdatedField}</p>
+                    <lightning-button label="Open Modal" onclick={handleOpenModal}></lightning-button>
+                </template>
+            </template>
         </div>
     </lightning-card>
 </template>
