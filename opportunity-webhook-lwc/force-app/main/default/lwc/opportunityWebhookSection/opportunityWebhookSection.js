@@ -8,19 +8,37 @@ import OPPORTUNITY_ID_FIELD from '@salesforce/schema/Opportunity.Id';
 export default class OpportunityWebhookSection extends LightningElement {
     @api recordId;
     webhookResponse;
+    opportunityData;
 
     @wire(getRecord, { recordId: '$recordId', fields: [API_UPDATED_FIELD, ACCOUNTID_FIELD, OPPORTUNITY_ID_FIELD] })
-    opportunity;
+    wiredOpportunity({ error, data }) {
+        if (data) {
+            this.opportunityData = data;
+        } else if (error) {
+            console.error('Error loading opportunity data:', error);
+        }
+    }
 
     get apiUpdatedField() {
-        return getFieldValue(this.opportunity.data, API_UPDATED_FIELD);
+        return this.opportunityData ? getFieldValue(this.opportunityData, API_UPDATED_FIELD) : '';
     }
 
     async handleOpenModal() {
-        const accountId = getFieldValue(this.opportunity.data, ACCOUNTID_FIELD);
-        const opportunityId = getFieldValue(this.opportunity.data, OPPORTUNITY_ID_FIELD);
+        if (!this.opportunityData) {
+            console.error('Opportunity data not loaded yet');
+            return;
+        }
+
+        const accountId = getFieldValue(this.opportunityData, ACCOUNTID_FIELD);
+        const opportunityId = getFieldValue(this.opportunityData, OPPORTUNITY_ID_FIELD);
         console.log('Opening modal with account ID:', accountId);
         console.log('Opportunity ID:', opportunityId);
+
+        if (!accountId && !opportunityId) {
+            console.error('Neither Account ID nor Opportunity ID available');
+            return;
+        }
+
         const result = await LightningModal.open({
             component: 'c:opportunityWebhookModal',
             componentParams: {
