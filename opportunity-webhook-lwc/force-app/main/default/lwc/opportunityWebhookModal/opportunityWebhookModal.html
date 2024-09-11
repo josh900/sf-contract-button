@@ -7,9 +7,7 @@
         <template if:false={isLoading}>
             <div if:true={htmlContent} lwc:dom="manual"></div>
             <template if:false={htmlContent}>
-                <template for:each={opportunityFields} for:item="field">
-                    <p key={field.label}><strong>{field.label}:</strong> {field.value}</p>
-                </template>
+                <p>No data available</p>
             </template>
         </template>
     </lightning-modal-body>

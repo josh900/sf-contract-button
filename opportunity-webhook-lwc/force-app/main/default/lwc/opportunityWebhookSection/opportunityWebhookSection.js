@@ -16,10 +16,12 @@ export default class OpportunityWebhookSection extends LightningElement {
     }
 
     async handleOpenModal() {
+        const accountId = getFieldValue(this.opportunity.data, ACCOUNTID_FIELD);
+        console.log('Opening modal with account ID:', accountId);
         const result = await LightningModal.open({
             component: 'c:opportunityWebhookModal',
             componentParams: {
-                accountId: getFieldValue(this.opportunity.data, ACCOUNTID_FIELD)
+                accountId: accountId
             },
             label: 'Opportunity Details'
         });

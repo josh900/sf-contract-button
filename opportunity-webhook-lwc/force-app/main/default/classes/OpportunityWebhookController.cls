@@ -26,7 +26,7 @@ public with sharing class OpportunityWebhookController {
     
     @AuraEnabled
     public static String getWebhookData(Id accountId) {
-        String webhookUrl = 'https://n8n.skoop.digital/webhook-test/2a5e55ae-1be9-466c-8f9a-a6s8u91d32rn';
+        String webhookUrl = 'https://n8n.skoop.digital/webhook/2a5e55ae-1be9-466c-8f9a-a6a7391d305e';
         
         Map<String, String> payload = new Map<String, String>{
             'accountId' => accountId
