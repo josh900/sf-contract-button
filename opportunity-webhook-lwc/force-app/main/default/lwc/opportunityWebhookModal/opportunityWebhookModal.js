@@ -1,18 +1,35 @@
-import { api } from 'lwc';
+import { api, track } from 'lwc';
 import LightningModal from 'lightning/modal';
-import sendToWebhook from '@salesforce/apex/OpportunityWebhookController.sendToWebhook';
+import getWebhookData from '@salesforce/apex/OpportunityWebhookController.getWebhookData';
 
 export default class OpportunityWebhookModal extends LightningModal {
     @api opportunityFields;
     @api accountId;
+    @track isLoading = true;
+    @track htmlContent;
 
-    async handleSubmit() {
+    connectedCallback() {
+        this.fetchWebhookData();
+    }
+
+    async fetchWebhookData() {
         try {
-            const result = await sendToWebhook({ accountId: this.accountId });
-            this.close(result);
+            const result = await getWebhookData({ accountId: this.accountId });
+            this.htmlContent = result;
+            this.isLoading = false;
         } catch (error) {
-            console.error('Error sending to webhook:', error);
-            this.close('Error: ' + error.body.message);
+            console.error('Error fetching webhook data:', error);
+            this.isLoading = false;
+        }
+    }
+
+    handleClose() {
+        this.close('Modal closed');
+    }
+
+    renderedCallback() {
+        if (this.htmlContent) {
+            this.template.querySelector('div[lwc:dom="manual"]').innerHTML = this.htmlContent;
         }
     }
 }
