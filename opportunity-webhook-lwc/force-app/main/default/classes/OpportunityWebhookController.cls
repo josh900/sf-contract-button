@@ -34,6 +34,7 @@ public with sharing class OpportunityWebhookController {
         req.setEndpoint(endpoint);
         req.setMethod('POST');
         req.setHeader('Content-Type', 'application/json');
+        req.setTimeout(120000); // Set timeout to 120 seconds
         
         Map<String, Object> bodyMap = new Map<String, Object>();
         bodyMap.put('id', id);
