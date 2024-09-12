@@ -1,47 +1,52 @@
 public with sharing class OpportunityWebhookController {
-    private static final String WEBHOOK_URL = 'https://n8n.skoop.digital/webhook/2a5e55ae-1be9-466c-8f9a-a6s8u91d32rn';
-
     @AuraEnabled
-    public static String getWebhookData(Id id, Boolean isOpportunityId) {
-        System.debug('getWebhookData called with id: ' + id + ', isOpportunityId: ' + isOpportunityId);
+    public static String sendToWebhook(Id accountId) {
+        String webhookUrl = 'https://n8n.skoop.digital/webhook/2a5e55ae-1be9-466c-8f9a-as6t391d3d8w';
         
-        String result;
-        if (isOpportunityId) {
-            result = sendToWebhook(id);
-        } else {
-            result = sendToWebhook(id);
-        }
-        
-        System.debug('Webhook response: ' + result);
-        return result;
-    }
-
-    private static String sendToWebhook(Id recordId) {
-        System.debug('sendToWebhook called with recordId: ' + recordId);
-        
-        HttpRequest req = new HttpRequest();
-        req.setEndpoint(WEBHOOK_URL);
-        req.setMethod('POST');
-        req.setHeader('Content-Type', 'application/json');
-        
-        Map<String, Object> bodyMap = new Map<String, Object>();
-        bodyMap.put('recordId', recordId);
-        bodyMap.put('objectType', recordId.getSObjectType().getDescribe().getName());
-        
-        req.setBody(JSON.serialize(bodyMap));
-        
-        System.debug('Sending request to webhook: ' + req);
+        Map<String, String> payload = new Map<String, String>{
+            'accountId' => accountId
+        };
+        String jsonBody = JSON.serialize(payload);
         
         Http http = new Http();
-        HTTPResponse res = http.send(req);
+        HttpRequest request = new HttpRequest();
+        request.setEndpoint(webhookUrl);
+        request.setMethod('POST');
+        request.setHeader('Content-Type', 'application/json');
+        request.setBody(jsonBody);
         
-        System.debug('Webhook response status: ' + res.getStatusCode());
-        System.debug('Webhook response body: ' + res.getBody());
+        HttpResponse response = http.send(request);
         
-        if (res.getStatusCode() == 200) {
-            return res.getBody();
+        if (response.getStatusCode() == 200) {
+            return 'Webhook triggered successfully. Response: ' + response.getBody();
         } else {
-            return '<p>Error: Unable to fetch data from webhook. Status code: ' + res.getStatusCode() + '</p>';
+            return 'Webhook failed. Status: ' + response.getStatus() + '. Response: ' + response.getBody();
+        }
+    }
+    
+    @AuraEnabled
+    public static String getWebhookData(Id id, Boolean isOpportunityId) {
+        String webhookUrl = 'https://n8n.skoop.digital/webhook/2a5e55ae-1be9-466c-8f9a-a6a7391d305e';
+        
+        Map<String, Object> payload = new Map<String, Object>{
+            'id' => id,
+            'isOpportunityId' => isOpportunityId
+        };
+        String jsonBody = JSON.serialize(payload);
+        
+        Http http = new Http();
+        HttpRequest request = new HttpRequest();
+        request.setEndpoint(webhookUrl);
+        request.setMethod('POST');
+        request.setHeader('Content-Type', 'application/json');
+        request.setBody(jsonBody);
+        
+        HttpResponse response = http.send(request);
+        
+        if (response.getStatusCode() == 200) {
+            return response.getBody();
+        } else {
+            return '<p>Error fetching data from webhook. Status: ' + response.getStatus() + '</p>';
         }
     }
 }
