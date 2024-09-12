@@ -6,9 +6,11 @@
         </template>
         <template if:false={isLoading}>
             <template if:true={error}>
-                <p class="slds-text-color_error">{error}</p>
+                <p class="slds-text-color_error">{error.message}</p>
             </template>
-            <div lwc:dom="manual"></div>
+            <template if:false={error}>
+                <div lwc:dom="manual"></div>
+            </template>
         </template>
     </lightning-modal-body>
     <lightning-modal-footer>

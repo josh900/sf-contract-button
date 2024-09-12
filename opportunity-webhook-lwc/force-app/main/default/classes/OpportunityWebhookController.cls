@@ -43,7 +43,7 @@ public with sharing class OpportunityWebhookController {
         String jsonBody = JSON.serialize(bodyMap);
         req.setBody(jsonBody);
         
-        System.debug('Sending request to webhook. Body: ' + jsonBody);
+        System.debug('Sending request to webhook. Endpoint: ' + endpoint + ', Body: ' + jsonBody);
         
         Http http = new Http();
         HTTPResponse res;
@@ -58,12 +58,12 @@ public with sharing class OpportunityWebhookController {
             } else {
                 String errorMessage = 'Error: Webhook returned status code ' + res.getStatusCode();
                 System.debug(errorMessage);
-                return '<p>' + errorMessage + '</p>';
+                throw new AuraHandledException(errorMessage);
             }
         } catch(Exception e) {
             String errorMessage = 'Error calling webhook: ' + e.getMessage();
             System.debug(errorMessage);
-            return '<p>' + errorMessage + '</p>';
+            throw new AuraHandledException(errorMessage);
         }
     }
 }
