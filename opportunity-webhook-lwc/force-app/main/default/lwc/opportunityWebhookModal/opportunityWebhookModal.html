@@ -5,6 +5,9 @@
             <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
         </template>
         <template if:false={isLoading}>
+            <template if:true={error}>
+                <p class="slds-text-color_error">{error}</p>
+            </template>
             <div lwc:dom="manual"></div>
         </template>
     </lightning-modal-body>

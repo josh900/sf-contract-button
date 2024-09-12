@@ -39,7 +39,10 @@ public with sharing class OpportunityWebhookController {
         bodyMap.put('id', id);
         bodyMap.put('isOpportunityId', isOpportunityId);
         
-        req.setBody(JSON.serialize(bodyMap));
+        String jsonBody = JSON.serialize(bodyMap);
+        req.setBody(jsonBody);
+        
+        System.debug('Sending request to webhook. Body: ' + jsonBody);
         
         Http http = new Http();
         HTTPResponse res;
@@ -52,11 +55,14 @@ public with sharing class OpportunityWebhookController {
             if (res.getStatusCode() == 200) {
                 return res.getBody();
             } else {
-                return '<p>Error: Webhook returned status code ' + res.getStatusCode() + '</p>';
+                String errorMessage = 'Error: Webhook returned status code ' + res.getStatusCode();
+                System.debug(errorMessage);
+                return '<p>' + errorMessage + '</p>';
             }
         } catch(Exception e) {
-            System.debug('Error calling webhook: ' + e.getMessage());
-            return '<p>Error: ' + e.getMessage() + '</p>';
+            String errorMessage = 'Error calling webhook: ' + e.getMessage();
+            System.debug(errorMessage);
+            return '<p>' + errorMessage + '</p>';
         }
     }
 }
