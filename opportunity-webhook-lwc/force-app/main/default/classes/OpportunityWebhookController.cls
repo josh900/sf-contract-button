@@ -1,7 +1,7 @@
 public with sharing class OpportunityWebhookController {
     @AuraEnabled
     public static String sendToWebhook(Id accountId) {
-        String webhookUrl = 'https://n8n.skoop.digital/webhook/2a5e55ae-1be9-466c-8f9a-a6a7391d305e';
+        String webhookUrl = 'https://n8n.skoop.digital/webhook/2a5e55ae-1be9-466c-8f9a-as6t391d3d8w';
         
         Map<String, String> payload = new Map<String, String>{
             'accountId' => accountId
@@ -15,12 +15,7 @@ public with sharing class OpportunityWebhookController {
         request.setHeader('Content-Type', 'application/json');
         request.setBody(jsonBody);
         
-        System.debug('Sending webhook request: ' + jsonBody);
-        
         HttpResponse response = http.send(request);
-        
-        System.debug('Webhook response status: ' + response.getStatusCode());
-        System.debug('Webhook response body: ' + response.getBody());
         
         if (response.getStatusCode() == 200) {
             return 'Webhook triggered successfully. Response: ' + response.getBody();

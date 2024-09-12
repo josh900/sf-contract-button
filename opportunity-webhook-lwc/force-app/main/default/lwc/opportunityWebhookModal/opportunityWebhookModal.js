@@ -1,30 +1,42 @@
-import { api } from 'lwc';
+import { api, track } from 'lwc';
 import LightningModal from 'lightning/modal';
-import sendToWebhook from '@salesforce/apex/OpportunityWebhookController.sendToWebhook';
+import getWebhookData from '@salesforce/apex/OpportunityWebhookController.getWebhookData';
 
 export default class OpportunityWebhookModal extends LightningModal {
-    @api opportunityData;
+    @api accountId;
+    @api isOpportunityId = false;
+    @track isLoading = true;
+    @track htmlContent;
 
-    get opportunityFields() {
-        if (!this.opportunityData) return [];
-        return [
-            { label: 'Name', value: this.opportunityData.fields.Name.value },
-            { label: 'Amount', value: this.opportunityData.fields.Amount.value },
-            { label: 'Close Date', value: this.opportunityData.fields.CloseDate.value },
-            { label: 'Stage', value: this.opportunityData.fields.StageName.value },
-            { label: 'Account ID', value: this.opportunityData.fields.AccountId.value },
-            { label: 'Probability', value: this.opportunityData.fields.Probability.value }
-        ];
+    connectedCallback() {
+        this.fetchWebhookData();
     }
 
-    async handleSubmit() {
+    async fetchWebhookData() {
         try {
-            const accountId = this.opportunityData.fields.AccountId.value;
-            const result = await sendToWebhook({ accountId: accountId });
-            this.close(result);
+            const idType = this.isOpportunityId ? 'Opportunity' : 'Account';
+            console.log(`Fetching webhook data for ${idType} ID:`, this.accountId);
+            const result = await getWebhookData({ 
+                id: this.accountId, 
+                isOpportunityId: this.isOpportunityId 
+            });
+            console.log('Webhook data received:', result);
+            this.htmlContent = result;
+            this.isLoading = false;
         } catch (error) {
-            console.error('Error sending to webhook:', error);
-            this.close('Error: ' + error.body.message);
+            console.error('Error fetching webhook data:', error);
+            this.htmlContent = '<p>Error fetching data from webhook.</p>';
+            this.isLoading = false;
+        }
+    }
+
+    handleClose() {
+        this.close('Modal closed');
+    }
+
+    renderedCallback() {
+        if (this.htmlContent) {
+            this.template.querySelector('div[lwc:dom="manual"]').innerHTML = this.htmlContent;
         }
     }
 }
