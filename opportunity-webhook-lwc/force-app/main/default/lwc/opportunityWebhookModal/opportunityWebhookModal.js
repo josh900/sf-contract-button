@@ -1,26 +1,42 @@
-import { api } from 'lwc';
+import { api, track } from 'lwc';
 import LightningModal from 'lightning/modal';
-import sendToWebhook from '@salesforce/apex/OpportunityWebhookController.sendToWebhook';
+import getWebhookData from '@salesforce/apex/OpportunityWebhookController.getWebhookData';
 
 export default class OpportunityWebhookModal extends LightningModal {
-    @api opportunityFields;
     @api accountId;
+    @api isOpportunityId = false;
+    @track isLoading = true;
+    @track htmlContent;
 
     connectedCallback() {
-        console.log('Modal connected. Opportunity fields:', this.opportunityFields);
-        console.log('Account ID:', this.accountId);
+        this.fetchWebhookData();
     }
 
-    async handleSubmit() {
-        console.log('Submit button clicked');
+    async fetchWebhookData() {
         try {
-            console.log('Sending to webhook with account ID:', this.accountId);
-            const result = await sendToWebhook({ accountId: this.accountId });
-            console.log('Webhook result:', result);
-            this.close(result);
+            const idType = this.isOpportunityId ? 'Opportunity' : 'Account';
+            console.log(`Fetching webhook data for ${idType} ID:`, this.accountId);
+            const result = await getWebhookData({ 
+                id: this.accountId, 
+                isOpportunityId: this.isOpportunityId 
+            });
+            console.log('Webhook data received:', result);
+            this.htmlContent = result;
+            this.isLoading = false;
         } catch (error) {
-            console.error('Error sending to webhook:', error);
-            this.close('Error: ' + (error.body ? error.body.message : error.message));
+            console.error('Error fetching webhook data:', error);
+            this.htmlContent = '<p>Error fetching data from webhook.</p>';
+            this.isLoading = false;
+        }
+    }
+
+    handleClose() {
+        this.close('Modal closed');
+    }
+
+    renderedCallback() {
+        if (this.htmlContent) {
+            this.template.querySelector('div[lwc:dom="manual"]').innerHTML = this.htmlContent;
         }
     }
 }
