@@ -27,7 +27,7 @@ export default class OpportunityWebhookModal extends LightningModal {
             this.isLoading = false;
         } catch (error) {
             console.error('Error fetching webhook data:', error.message);
-            this.error = error;
+            this.error = error.message;
             this.isLoading = false;
         }
     }

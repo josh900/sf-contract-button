@@ -53,15 +53,15 @@ public with sharing class OpportunityWebhookController {
             System.debug('Webhook response status: ' + res.getStatusCode());
             System.debug('Webhook response body: ' + res.getBody());
             
-            if (res.getStatusCode() == 200) {
+            if (res.getStatusCode() >= 200 && res.getStatusCode() < 300) {
                 return res.getBody();
             } else {
-                String errorMessage = 'Error: Webhook returned status code ' + res.getStatusCode();
+                String errorMessage = 'Error: Webhook returned status code ' + res.getStatusCode() + '. Response: ' + res.getBody();
                 System.debug(errorMessage);
                 throw new AuraHandledException(errorMessage);
             }
         } catch(Exception e) {
-            String errorMessage = 'Error calling webhook: ' + e.getMessage();
+            String errorMessage = 'Error calling webhook: ' + e.getMessage() + '. Stack trace: ' + e.getStackTraceString();
             System.debug(errorMessage);
             throw new AuraHandledException(errorMessage);
         }
