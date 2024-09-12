@@ -4,39 +4,47 @@ import getWebhookData from '@salesforce/apex/OpportunityWebhookController.getWeb
 
 export default class OpportunityWebhookModal extends LightningModal {
     @api accountId;
-    @api isOpportunityId = false;
+    @api opportunityFields;
     @track isLoading = true;
     @track htmlContent;
 
     connectedCallback() {
+        console.log('OpportunityWebhookModal connected. AccountId:', this.accountId);
+        console.log('OpportunityFields:', JSON.stringify(this.opportunityFields));
         this.fetchWebhookData();
     }
 
     async fetchWebhookData() {
         try {
-            const idType = this.isOpportunityId ? 'Opportunity' : 'Account';
-            console.log(`Fetching webhook data for ${idType} ID:`, this.accountId);
+            console.log('Fetching webhook data for Account ID:', this.accountId);
             const result = await getWebhookData({ 
                 id: this.accountId, 
-                isOpportunityId: this.isOpportunityId 
+                isOpportunityId: false 
             });
             console.log('Webhook data received:', result);
             this.htmlContent = result;
             this.isLoading = false;
         } catch (error) {
-            console.error('Error fetching webhook data:', error);
+            console.error('Error fetching webhook data:', JSON.stringify(error));
             this.htmlContent = '<p>Error fetching data from webhook.</p>';
             this.isLoading = false;
         }
     }
 
     handleClose() {
+        console.log('Closing modal');
         this.close('Modal closed');
     }
 
     renderedCallback() {
+        console.log('Modal rendered. HTML content:', this.htmlContent);
         if (this.htmlContent) {
-            this.template.querySelector('div[lwc:dom="manual"]').innerHTML = this.htmlContent;
+            const container = this.template.querySelector('div[lwc:dom="manual"]');
+            if (container) {
+                container.innerHTML = this.htmlContent;
+            } else {
+                console.error('Container for HTML content not found');
+            }
         }
     }
 }

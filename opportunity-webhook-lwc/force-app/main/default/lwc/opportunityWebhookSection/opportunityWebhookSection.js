@@ -20,11 +20,11 @@ export default class OpportunityWebhookSection extends LightningElement {
     })
     wiredOpportunity({ error, data }) {
         if (data) {
-            console.log('Opportunity data loaded:', data);
+            console.log('Opportunity data loaded:', JSON.stringify(data));
             this.opportunityData = data;
             this.error = undefined;
         } else if (error) {
-            console.error('Error loading opportunity data:', error);
+            console.error('Error loading opportunity data:', JSON.stringify(error));
             this.error = error;
             this.opportunityData = undefined;
         }
@@ -44,14 +44,14 @@ export default class OpportunityWebhookSection extends LightningElement {
     }
 
     async handleOpenModal() {
-        console.log('handleOpenModal called, opportunityData:', this.opportunityData);
+        console.log('handleOpenModal called, opportunityData:', JSON.stringify(this.opportunityData));
         if (this.isLoading) {
             console.log('Data is still loading. Please wait.');
             return;
         }
 
         if (this.error) {
-            console.error('Error loading opportunity data:', this.error);
+            console.error('Error loading opportunity data:', JSON.stringify(this.error));
             return;
         }
 
@@ -63,16 +63,21 @@ export default class OpportunityWebhookSection extends LightningElement {
         const accountId = getFieldValue(this.opportunityData, ACCOUNTID_FIELD);
         console.log('Opening modal with account ID:', accountId);
 
-        const result = await LightningModal.open({
-            component: 'c:opportunityWebhookModal',
-            componentParams: {
-                opportunityFields: this.opportunityFields,
-                accountId: accountId
-            },
-            label: 'Opportunity Details'
-        });
-        if (result) {
-            this.webhookResponse = result;
+        try {
+            const result = await LightningModal.open({
+                component: 'c:opportunityWebhookModal',
+                componentParams: {
+                    opportunityFields: this.opportunityFields,
+                    accountId: accountId
+                },
+                label: 'Opportunity Details'
+            });
+            console.log('Modal result:', JSON.stringify(result));
+            if (result) {
+                this.webhookResponse = result;
+            }
+        } catch (error) {
+            console.error('Error opening modal:', JSON.stringify(error));
         }
     }
 }
