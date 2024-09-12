@@ -22,12 +22,21 @@ export default class OpportunityWebhookModal extends LightningModal {
                 id: this.accountId, 
                 isOpportunityId: false 
             });
-            console.log('Webhook data received:', result);
-            this.htmlContent = result;
-            this.isLoading = false;
+            console.log('Raw webhook response:', result);
+            if (result) {
+                try {
+                    this.htmlContent = JSON.parse(result);
+                } catch (e) {
+                    this.htmlContent = result;
+                }
+                console.log('Processed webhook data:', this.htmlContent);
+                this.isLoading = false;
+            } else {
+                throw new Error('No data received from webhook');
+            }
         } catch (error) {
-            console.error('Error fetching webhook data:', error.message);
-            this.error = error.message;
+            console.error('Error fetching webhook data:', error);
+            this.error = error.message || JSON.stringify(error);
             this.isLoading = false;
         }
     }
