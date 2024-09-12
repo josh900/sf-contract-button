@@ -9,6 +9,7 @@ export default class OpportunityWebhookModal extends LightningModal {
     @track htmlContent;
 
     connectedCallback() {
+        console.log('OpportunityWebhookModal connected, accountId:', this.accountId);
         this.fetchWebhookData();
     }
 
