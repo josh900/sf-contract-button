@@ -9,7 +9,7 @@
                 <p class="slds-text-color_error">{error}</p>
             </template>
             <template if:false={error}>
-                <div class="webhook-content"></div>
+                <div lwc:dom="manual"></div>
             </template>
         </template>
     </lightning-modal-body>

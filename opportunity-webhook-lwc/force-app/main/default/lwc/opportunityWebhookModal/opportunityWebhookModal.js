@@ -1,12 +1,13 @@
-import { LightningElement, api } from 'lwc';
+import { api, track } from 'lwc';
+import LightningModal from 'lightning/modal';
 import getWebhookData from '@salesforce/apex/OpportunityWebhookController.getWebhookData';
 
-export default class OpportunityWebhookModal extends LightningElement {
+export default class OpportunityWebhookModal extends LightningModal {
     @api accountId;
     @api opportunityFields;
-    isLoading = true;
-    error;
-    htmlContent;
+    @track isLoading = true;
+    @track htmlContent;
+    @track error;
 
     connectedCallback() {
         console.log('OpportunityWebhookModal connected');
@@ -24,27 +25,42 @@ export default class OpportunityWebhookModal extends LightningElement {
                 isOpportunityId: false 
             });
             console.log('getWebhookData result:', result);
+            console.log('Raw webhook response:', result);
+            console.log('Webhook data received:', result);
+            if (result) {
+                try {
+                    this.htmlContent = JSON.parse(result);
+                } catch (e) {
+                    this.htmlContent = result;
+                }
+                console.log('Processed webhook data:', this.htmlContent);
+                this.isLoading = false;
+            } else {
+                throw new Error('No data received from webhook');
+            }
             this.htmlContent = result;
-            this.error = undefined;
+            this.isLoading = false;
         } catch (error) {
             console.error('Error in fetchWebhookData:', error);
             this.error = error.message || JSON.stringify(error);
-            this.htmlContent = undefined;
-        } finally {
             this.isLoading = false;
         }
     }
 
-    renderedCallback() {
-        if (this.htmlContent) {
-            const container = this.template.querySelector('.webhook-content');
-            if (container) {
-                container.innerHTML = this.htmlContent;
-            }
-        }
+    handleClose() {
+        console.log('Closing modal');
+        this.close('Modal closed');
     }
 
-    handleClose() {
-        this.close('closed');
+    renderedCallback() {
+        console.log('Modal rendered. HTML content:', this.htmlContent);
+        if (this.htmlContent) {
+            const container = this.template.querySelector('div[lwc:dom="manual"]');
+            if (container) {
+                container.innerHTML = this.htmlContent;
+            } else {
+                console.error('Container for HTML content not found');
+            }
+        }
     }
 }
