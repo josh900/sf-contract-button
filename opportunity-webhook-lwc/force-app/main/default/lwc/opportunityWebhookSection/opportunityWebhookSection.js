@@ -7,6 +7,7 @@ import CLOSEDATE_FIELD from '@salesforce/schema/Opportunity.CloseDate';
 import STAGENAME_FIELD from '@salesforce/schema/Opportunity.StageName';
 import ACCOUNTID_FIELD from '@salesforce/schema/Opportunity.AccountId';
 import PROBABILITY_FIELD from '@salesforce/schema/Opportunity.Probability';
+import API_UPDATED_FIELD from '@salesforce/schema/Opportunity.API_Updated_Field__c';
 
 export default class OpportunityWebhookSection extends LightningElement {
     @api recordId; // This is the opportunity ID
@@ -17,7 +18,7 @@ export default class OpportunityWebhookSection extends LightningElement {
 
     @wire(getRecord, { 
         recordId: '$recordId', 
-        fields: [NAME_FIELD, AMOUNT_FIELD, CLOSEDATE_FIELD, STAGENAME_FIELD, ACCOUNTID_FIELD, PROBABILITY_FIELD] 
+        fields: [NAME_FIELD, AMOUNT_FIELD, CLOSEDATE_FIELD, STAGENAME_FIELD, ACCOUNTID_FIELD, PROBABILITY_FIELD, API_UPDATED_FIELD] 
     })
     wiredOpportunity({ error, data }) {
         if (data) {
@@ -30,6 +31,14 @@ export default class OpportunityWebhookSection extends LightningElement {
             this.opportunityData = undefined;
         }
         this.isLoading = false;
+    }
+
+    get statusLabel() {
+        return 'Status: ';
+    }
+
+    get apiUpdatedField() {
+        return this.opportunityData ? getFieldValue(this.opportunityData, API_UPDATED_FIELD) : '';
     }
 
     get opportunityFields() {

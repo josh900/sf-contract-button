@@ -9,6 +9,10 @@
                     <p>Error: {error.body.message}</p>
                 </template>
                 <template if:false={error}>
+                    <div class="slds-m-bottom_small">
+                        <lightning-formatted-text value={statusLabel} class="slds-text-heading_small"></lightning-formatted-text>
+                        <lightning-formatted-text value={apiUpdatedField} class="slds-text-body_regular"></lightning-formatted-text>
+                    </div>
                     <lightning-button label="Preview Contract" onclick={handleOpenModal}></lightning-button>
                 </template>
             </template>
