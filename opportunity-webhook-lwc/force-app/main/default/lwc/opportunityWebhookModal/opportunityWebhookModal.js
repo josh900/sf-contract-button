@@ -38,9 +38,9 @@ export default class OpportunityWebhookModal extends LightningModal {
                 id: this.opportunityId, 
                 isOpportunityId: true 
             });
-            // console.log('getWebhookData result:', result);
-            // console.log('Raw webhook response:', result);
-            // console.log('Webhook data received:', result);
+            console.log('getWebhookData result:', result);
+            console.log('Raw webhook response:', result);
+            console.log('Webhook data received:', result);
             if (result) {
                 try {
                     const parser = new DOMParser();
@@ -55,7 +55,7 @@ export default class OpportunityWebhookModal extends LightningModal {
                 } catch (e) {
                     this.htmlContent = result;
                 }
-                // console.log('Processed webhook data:', this.htmlContent);
+                console.log('Processed webhook data:', this.htmlContent);
                 this.isLoading = false;
             } else {
                 throw new Error('No data received from webhook');
@@ -72,7 +72,7 @@ export default class OpportunityWebhookModal extends LightningModal {
         this.isSubmitting = true;
         try {
             const result = await sendToWebhook({ accountId: this.accountId });
-            // console.log('Webhook submission result:', result);
+            console.log('Webhook submission result:', result);
             this.close('Contract submitted');
         } catch (error) {
             console.error('Error submitting contract:', error);
@@ -88,7 +88,7 @@ export default class OpportunityWebhookModal extends LightningModal {
     }
 
     renderedCallback() {
-        // console.log('Modal rendered. HTML content:', this.htmlContent);
+        console.log('Modal rendered. HTML content:', this.htmlContent);
         if (this.htmlContent) {
             const container = this.template.querySelector('.webhook-content');
             if (container) {
