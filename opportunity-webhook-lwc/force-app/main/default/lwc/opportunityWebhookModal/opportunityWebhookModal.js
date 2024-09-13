@@ -3,12 +3,22 @@ import LightningModal from 'lightning/modal';
 import getWebhookData from '@salesforce/apex/OpportunityWebhookController.getWebhookData';
 
 export default class OpportunityWebhookModal extends LightningModal {
-    @api accountId;
-    @api opportunityId; // Add this line
-    @api opportunityFields;
+    @api content;
     @track isLoading = true;
     @track htmlContent;
     @track error;
+
+    get accountId() {
+        return this.content?.accountId;
+    }
+
+    get opportunityId() {
+        return this.content?.opportunityId;
+    }
+
+    get opportunityFields() {
+        return this.content?.opportunityFields;
+    }
 
     connectedCallback() {
         console.log('OpportunityWebhookModal connected');
