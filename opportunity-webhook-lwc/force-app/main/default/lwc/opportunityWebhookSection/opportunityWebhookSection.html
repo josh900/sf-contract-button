@@ -17,7 +17,7 @@
                     </template>
                     <template if:true={contractUrl}>
                         <div class="slds-m-bottom_small">
-                            <lightning-formatted-url value={contractUrl} label="Open Signed Contract" target="_blank"></lightning-formatted-url>
+                            <lightning-formatted-url value={contractUrl} label="View Contract" target="_blank"></lightning-formatted-url>
                         </div>
                     </template>
                     <lightning-button label="Preview Contract" onclick={handleOpenModal}></lightning-button>
@@ -25,18 +25,4 @@
             </template>
         </div>
     </lightning-card>
-
-    <!-- Add modal component here if it's not already present -->
-    <template if:true={isModalOpen}>
-        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_medium" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1">
-            <div class="slds-modal__container">
-                <!-- Modal header and content -->
-                <footer class="slds-modal__footer">
-                    <lightning-button label="Close" onclick={closeModal}></lightning-button>
-                    <lightning-button label="Submit Contract" variant="brand" onclick={handleSubmitContract}></lightning-button>
-                </footer>
-            </div>
-        </section>
-        <div class="slds-backdrop slds-backdrop_open"></div>
-    </template>
 </template>
