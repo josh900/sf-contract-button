@@ -1,12 +1,14 @@
 import { api, track } from 'lwc';
 import LightningModal from 'lightning/modal';
 import getWebhookData from '@salesforce/apex/OpportunityWebhookController.getWebhookData';
+import sendToWebhook from '@salesforce/apex/OpportunityWebhookController.sendToWebhook';
 
 export default class OpportunityWebhookModal extends LightningModal {
     @api content;
     @track isLoading = true;
     @track htmlContent;
     @track error;
+    @track isSubmitting = false;
 
     get accountId() {
         return this.content?.accountId;
@@ -62,6 +64,21 @@ export default class OpportunityWebhookModal extends LightningModal {
             console.error('Error in fetchWebhookData:', error);
             this.error = error.message || JSON.stringify(error);
             this.isLoading = false;
+        }
+    }
+
+    async handleSubmit() {
+        console.log('Submitting contract');
+        this.isSubmitting = true;
+        try {
+            const result = await sendToWebhook({ accountId: this.accountId });
+            console.log('Webhook submission result:', result);
+            this.close('Contract submitted');
+        } catch (error) {
+            console.error('Error submitting contract:', error);
+            this.error = 'Failed to submit contract. Please try again.';
+        } finally {
+            this.isSubmitting = false;
         }
     }
 
