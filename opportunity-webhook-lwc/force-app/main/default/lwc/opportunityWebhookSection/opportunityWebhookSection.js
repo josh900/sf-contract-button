@@ -14,7 +14,6 @@ export default class OpportunityWebhookSection extends LightningElement {
     webhookResponse;
     error;
     isLoading = true;
-    opportunityData;
 
     @wire(getRecord, { 
         recordId: '$recordId', 
@@ -67,7 +66,6 @@ export default class OpportunityWebhookSection extends LightningElement {
         try {
             console.log('Attempting to open modal...');
             const result = await OpportunityWebhookModal.open({
-                size: 'large',
                 componentParams: {
                     opportunityFields: this.opportunityFields,
                     opportunityId: this.recordId

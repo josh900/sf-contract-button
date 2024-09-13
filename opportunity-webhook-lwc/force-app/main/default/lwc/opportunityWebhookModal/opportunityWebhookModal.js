@@ -13,12 +13,7 @@ export default class OpportunityWebhookModal extends LightningModal {
         console.log('OpportunityWebhookModal connected');
         console.log('OpportunityId:', this.opportunityId);
         console.log('OpportunityFields:', JSON.stringify(this.opportunityFields));
-        if (this.opportunityId) {
-            this.fetchWebhookData();
-        } else {
-            this.error = 'Opportunity ID is missing';
-            this.isLoading = false;
-        }
+        this.fetchWebhookData();
     }
 
     async fetchWebhookData() {
@@ -35,6 +30,7 @@ export default class OpportunityWebhookModal extends LightningModal {
             const result = await getWebhookData({ id: this.opportunityId, isOpportunityId: true });
             console.log('getWebhookData result:', result);
             console.log('Raw webhook response:', result);
+            console.log('Webhook data received:', result);
             if (result) {
                 try {
                     const parser = new DOMParser();
@@ -50,13 +46,13 @@ export default class OpportunityWebhookModal extends LightningModal {
                     this.htmlContent = result;
                 }
                 console.log('Processed webhook data:', this.htmlContent);
+                this.isLoading = false;
             } else {
                 throw new Error('No data received from webhook');
             }
         } catch (error) {
             console.error('Error in fetchWebhookData:', error);
             this.error = error.message || JSON.stringify(error);
-        } finally {
             this.isLoading = false;
         }
     }
