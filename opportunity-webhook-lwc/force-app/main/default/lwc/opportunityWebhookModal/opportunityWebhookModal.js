@@ -38,8 +38,6 @@ export default class OpportunityWebhookModal extends LightningModal {
             } else {
                 throw new Error('No data received from webhook');
             }
-            this.htmlContent = result;
-            this.isLoading = false;
         } catch (error) {
             console.error('Error in fetchWebhookData:', error);
             this.error = error.message || JSON.stringify(error);
@@ -55,7 +53,7 @@ export default class OpportunityWebhookModal extends LightningModal {
     renderedCallback() {
         console.log('Modal rendered. HTML content:', this.htmlContent);
         if (this.htmlContent) {
-            const container = this.template.querySelector('div[lwc:dom="manual"]');
+            const container = this.template.querySelector('.webhook-content');
             if (container) {
                 container.innerHTML = this.htmlContent;
             } else {
