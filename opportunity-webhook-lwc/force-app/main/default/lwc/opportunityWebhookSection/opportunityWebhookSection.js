@@ -1,4 +1,4 @@
-import { LightningElement, api, wire } from 'lwc';
+import { LightningElement, api, track, wire } from 'lwc';
 import { getRecord, getFieldValue } from 'lightning/uiRecordApi';
 import OpportunityWebhookModal from 'c/opportunityWebhookModal';
 import NAME_FIELD from '@salesforce/schema/Opportunity.Name';
@@ -9,8 +9,10 @@ import ACCOUNTID_FIELD from '@salesforce/schema/Opportunity.AccountId';
 import PROBABILITY_FIELD from '@salesforce/schema/Opportunity.Probability';
 import API_UPDATED_FIELD from '@salesforce/schema/Opportunity.API_Updated_Field__c';
 import CONTRACT_URL_FIELD from '@salesforce/schema/Opportunity.contract_url__c';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 export default class OpportunityWebhookSection extends LightningElement {
+    @track isModalOpen = false;
     @api recordId; // This is the opportunity ID
     webhookResponse;
     error;
@@ -96,6 +98,49 @@ export default class OpportunityWebhookSection extends LightningElement {
             }
         } catch (error) {
             console.error('Error opening modal:', JSON.stringify(error));
+        }
+    }
+
+    handleOpenModal() {
+        this.isModalOpen = true;
+    }
+
+    closeModal() {
+        this.isModalOpen = false;
+    }
+
+    async handleSubmitContract() {
+        try {
+            const response = await fetch('https://n8n.skoop.digital/webhook/2a5e55ae-1be9-466c-8f9a-as6t391d3d8w', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ opportunityId: this.recordId }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to submit contract');
+            }
+
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Success',
+                    message: 'Contract submitted successfully',
+                    variant: 'success',
+                })
+            );
+
+            this.closeModal();
+        } catch (error) {
+            console.error('Error submitting contract:', error);
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Error',
+                    message: 'Failed to submit contract',
+                    variant: 'error',
+                })
+            );
         }
     }
 }
