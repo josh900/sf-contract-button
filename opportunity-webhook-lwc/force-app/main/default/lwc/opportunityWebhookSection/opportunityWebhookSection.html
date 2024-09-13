@@ -10,9 +10,14 @@
                 </template>
                 <template if:false={error}>
                     <template if:true={apiUpdatedField}>
-                        <div class="slds-m-bottom_medium">
+                        <div class="slds-m-bottom_small">
                             <lightning-formatted-text value={statusLabel} class="slds-text-heading_small"></lightning-formatted-text>
                             <lightning-formatted-text value={apiUpdatedField} class="slds-text-body_regular"></lightning-formatted-text>
+                        </div>
+                    </template>
+                    <template if:true={contractUrl}>
+                        <div class="slds-m-bottom_small">
+                            <lightning-formatted-url value={contractUrl} label="View Contract" target="_blank"></lightning-formatted-url>
                         </div>
                     </template>
                     <lightning-button label="Preview Contract" onclick={handleOpenModal}></lightning-button>
