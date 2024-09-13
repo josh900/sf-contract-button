@@ -61,18 +61,17 @@ export default class OpportunityWebhookSection extends LightningElement {
             return;
         }
 
-        // Use the recordId (which should be the Opportunity ID) instead of the Account ID
-        console.log('Opening modal with opportunity ID:', this.recordId);
+        const accountId = getFieldValue(this.opportunityData, ACCOUNTID_FIELD);
+        console.log('Opening modal with account ID:', accountId);
 
         try {
             console.log('Attempting to open modal...');
             const result = await OpportunityWebhookModal.open({
-                size: 'large',
-                description: 'Opportunity Details Modal',
-                content: {
+                componentParams: {
                     opportunityFields: this.opportunityFields,
-                    accountId: this.recordId // Rename this to opportunityId for clarity
+                    accountId: accountId
                 },
+                label: 'Opportunity Details'
             });
             console.log('Modal opened successfully');
             console.log('Modal result:', JSON.stringify(result));

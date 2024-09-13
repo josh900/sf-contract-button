@@ -28,12 +28,6 @@ public with sharing class OpportunityWebhookController {
     public static String getWebhookData(Id id, Boolean isOpportunityId) {
         System.debug('getWebhookData called with id: ' + id + ', isOpportunityId: ' + isOpportunityId);
         
-        // If it's an Opportunity ID, you might want to get the related Account ID here
-        if (isOpportunityId) {
-            Opportunity opp = [SELECT AccountId FROM Opportunity WHERE Id = :id];
-            id = opp.AccountId;
-        }
-        
         String endpoint = 'https://n8n.skoop.digital/webhook/2a5e55ae-1be9-466c-8f9a-a6s8u91d32rn';
         
         HttpRequest req = new HttpRequest();

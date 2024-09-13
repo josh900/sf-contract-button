@@ -3,7 +3,7 @@ import LightningModal from 'lightning/modal';
 import getWebhookData from '@salesforce/apex/OpportunityWebhookController.getWebhookData';
 
 export default class OpportunityWebhookModal extends LightningModal {
-    @api opportunityId; // Changed from accountId
+    @api accountId;
     @api opportunityFields;
     @track isLoading = true;
     @track htmlContent;
@@ -11,7 +11,7 @@ export default class OpportunityWebhookModal extends LightningModal {
 
     connectedCallback() {
         console.log('OpportunityWebhookModal connected');
-        console.log('OpportunityId:', this.opportunityId);
+        console.log('AccountId:', this.accountId);
         console.log('OpportunityFields:', JSON.stringify(this.opportunityFields));
         this.fetchWebhookData();
     }
@@ -19,10 +19,10 @@ export default class OpportunityWebhookModal extends LightningModal {
     async fetchWebhookData() {
         console.log('fetchWebhookData called');
         try {
-            console.log('Calling getWebhookData with opportunityId:', this.opportunityId);
+            console.log('Calling getWebhookData with accountId:', this.accountId);
             const result = await getWebhookData({ 
-                id: this.opportunityId, 
-                isOpportunityId: true // Changed to true
+                id: this.accountId, 
+                isOpportunityId: false 
             });
             console.log('getWebhookData result:', result);
             console.log('Raw webhook response:', result);
