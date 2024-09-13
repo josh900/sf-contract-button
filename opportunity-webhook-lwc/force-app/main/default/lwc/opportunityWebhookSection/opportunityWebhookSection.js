@@ -68,7 +68,7 @@ export default class OpportunityWebhookSection extends LightningElement {
             console.log('Attempting to open modal...');
             const result = await OpportunityWebhookModal.open({
                 size: 'large',
-                description: 'Opportunity Details Modal',
+                description: 'Contract Preview Modal',
                 content: {
                     opportunityFields: this.opportunityFields,
                     accountId: accountId,

@@ -1,5 +1,5 @@
 <template>
-    <lightning-card title="Opportunity Webhook Section">
+    <lightning-card title="Contract Submission">
         <div class="slds-m-around_medium">
             <template if:true={isLoading}>
                 <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
@@ -9,7 +9,7 @@
                     <p>Error: {error.body.message}</p>
                 </template>
                 <template if:false={error}>
-                    <lightning-button label="Open Modal" onclick={handleOpenModal}></lightning-button>
+                    <lightning-button label="Preview Contract" onclick={handleOpenModal}></lightning-button>
                 </template>
             </template>
         </div>
