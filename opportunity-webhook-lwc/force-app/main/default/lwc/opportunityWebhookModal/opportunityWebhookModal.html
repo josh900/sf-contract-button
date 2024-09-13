@@ -15,6 +15,8 @@
     </lightning-modal-body>
     <lightning-modal-footer>
         <lightning-button label="Close" onclick={handleClose}></lightning-button>
-        <lightning-button label="Submit" variant="brand" onclick={handleSubmit} class="slds-m-left_x-small" disabled={isSubmitting}></lightning-button>
+        <template if:true={showSubmitButton}>
+            <lightning-button label="Submit" variant="brand" onclick={handleSubmit} class="slds-m-left_x-small" disabled={isSubmitting}></lightning-button>
+        </template>
     </lightning-modal-footer>
 </template>

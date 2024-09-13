@@ -67,6 +67,11 @@ export default class OpportunityWebhookModal extends LightningModal {
         }
     }
 
+    get showSubmitButton() {
+        const apiUpdatedField = this.content?.opportunityFields.find(field => field.label === 'API Updated Field')?.value;
+        return !(apiUpdatedField && (apiUpdatedField.includes('Sent on') || apiUpdatedField.includes('Signed on')));
+    }
+
     async handleSubmit() {
         console.log('Submitting contract');
         this.isSubmitting = true;

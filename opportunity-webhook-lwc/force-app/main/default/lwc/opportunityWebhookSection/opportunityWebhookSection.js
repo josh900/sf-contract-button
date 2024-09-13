@@ -54,7 +54,8 @@ export default class OpportunityWebhookSection extends LightningElement {
             { label: 'Close Date', value: getFieldValue(this.opportunityData, CLOSEDATE_FIELD) },
             { label: 'Stage', value: getFieldValue(this.opportunityData, STAGENAME_FIELD) },
             { label: 'Account ID', value: getFieldValue(this.opportunityData, ACCOUNTID_FIELD) },
-            { label: 'Probability', value: getFieldValue(this.opportunityData, PROBABILITY_FIELD) }
+            { label: 'Probability', value: getFieldValue(this.opportunityData, PROBABILITY_FIELD) },
+            { label: 'API Updated Field', value: getFieldValue(this.opportunityData, API_UPDATED_FIELD) }
         ];
     }
 
