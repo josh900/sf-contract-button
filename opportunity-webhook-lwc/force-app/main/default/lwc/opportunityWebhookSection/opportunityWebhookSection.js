@@ -1,6 +1,7 @@
 import { LightningElement, api, wire } from 'lwc';
 import { getRecord, getFieldValue } from 'lightning/uiRecordApi';
 import LightningModal from 'lightning/modal';
+import OpportunityWebhookModal from 'c/opportunityWebhookModal';
 import NAME_FIELD from '@salesforce/schema/Opportunity.Name';
 import AMOUNT_FIELD from '@salesforce/schema/Opportunity.Amount';
 import CLOSEDATE_FIELD from '@salesforce/schema/Opportunity.CloseDate';
@@ -66,12 +67,11 @@ export default class OpportunityWebhookSection extends LightningElement {
         try {
             console.log('Attempting to open modal...');
             const result = await OpportunityWebhookModal.open({
-                size: 'large',
-                description: 'Opportunity Details Modal',
-                content: {
+                componentParams: {
                     opportunityFields: this.opportunityFields,
                     accountId: accountId
                 },
+                label: 'Opportunity Details'
             });
             console.log('Modal opened successfully');
             console.log('Modal result:', JSON.stringify(result));
