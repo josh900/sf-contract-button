@@ -10,10 +10,11 @@ import ACCOUNTID_FIELD from '@salesforce/schema/Opportunity.AccountId';
 import PROBABILITY_FIELD from '@salesforce/schema/Opportunity.Probability';
 
 export default class OpportunityWebhookSection extends LightningElement {
-    @api recordId;
+    @api recordId; // This is the opportunity ID
     webhookResponse;
     error;
     isLoading = true;
+    opportunityData;
 
     @wire(getRecord, { 
         recordId: '$recordId', 
@@ -62,14 +63,15 @@ export default class OpportunityWebhookSection extends LightningElement {
         }
 
         const accountId = getFieldValue(this.opportunityData, ACCOUNTID_FIELD);
-        console.log('Opening modal with account ID:', accountId);
+        console.log('Opening modal with opportunity ID:', this.recordId);
 
         try {
             console.log('Attempting to open modal...');
             const result = await OpportunityWebhookModal.open({
                 componentParams: {
                     opportunityFields: this.opportunityFields,
-                    accountId: accountId
+                    accountId: accountId,
+                    opportunityId: this.recordId // Pass the opportunity ID
                 },
                 label: 'Opportunity Details'
             });

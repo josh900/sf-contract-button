@@ -26,41 +26,30 @@ public with sharing class OpportunityWebhookController {
     
     @AuraEnabled
     public static String getWebhookData(Id id, Boolean isOpportunityId) {
-        System.debug('getWebhookData called with id: ' + id + ', isOpportunityId: ' + isOpportunityId);
-        
-        String endpoint = 'https://n8n.skoop.digital/webhook/2a5e55ae-1be9-466c-8f9a-a6s8u91d32rn';
-        
-        HttpRequest req = new HttpRequest();
-        req.setEndpoint(endpoint);
-        req.setMethod('POST');
-        req.setHeader('Content-Type', 'application/json');
-        req.setTimeout(120000); // Set timeout to 120 seconds
-        
-        Map<String, Object> bodyMap = new Map<String, Object>();
-        bodyMap.put('id', id);
-        bodyMap.put('isOpportunityId', isOpportunityId);
-        
-        String jsonBody = JSON.serialize(bodyMap);
-        req.setBody(jsonBody);
-        
-        System.debug('Sending request to webhook. Endpoint: ' + endpoint + ', Body: ' + jsonBody);
-        
-        Http http = new Http();
-        HTTPResponse res;
-        
         try {
-            res = http.send(req);
-            System.debug('Webhook response status: ' + res.getStatusCode());
-            System.debug('Webhook response body: ' + res.getBody());
+            String endpoint = 'https://n8n.skoop.digital/webhook/2a5e55ae-1be9-466c-8f9a-a6s8u91d32rn';
             
-            if (res.getStatusCode() >= 200 && res.getStatusCode() < 300) {
-                return res.getBody();
+            Map<String, Object> requestBody = new Map<String, Object>{
+                'isOpportunityId' => isOpportunityId,
+                'id' => id
+            };
+
+            Http http = new Http();
+            HttpRequest request = new HttpRequest();
+            request.setEndpoint(endpoint);
+            request.setMethod('POST');
+            request.setHeader('Content-Type', 'application/json');
+            request.setBody(JSON.serialize(requestBody));
+
+            HttpResponse response = http.send(request);
+
+            if (response.getStatusCode() == 200) {
+                return response.getBody();
             } else {
-                throw new AuraHandledException('Webhook returned status code ' + res.getStatusCode() + '. Response: ' + res.getBody());
+                throw new AuraHandledException('HTTP request failed with status code: ' + response.getStatusCode());
             }
-        } catch(Exception e) {
-            System.debug('Error calling webhook: ' + e.getMessage() + '. Stack trace: ' + e.getStackTraceString());
-            throw new AuraHandledException('Error calling webhook: ' + e.getMessage());
+        } catch (Exception e) {
+            throw new AuraHandledException('Error in getWebhookData: ' + e.getMessage());
         }
     }
 }
