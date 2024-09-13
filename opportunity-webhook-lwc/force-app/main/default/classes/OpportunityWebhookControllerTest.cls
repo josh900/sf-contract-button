@@ -45,7 +45,7 @@ private class OpportunityWebhookControllerTest {
             if (req.getEndpoint().contains('2a5e55ae-1be9-466c-8f9a-a6s8u91d32rn')) {
                 // This is the getWebhookData call
                 res.setBody('{"field1": "value1", "field2": "value2"}');
-            } else if (req.getEndpoint().contains('2a5e55ae-1be9-466c-8f9a-as6t391d3d8w')) {
+            } else if (req.getEndpoint().contains('c9401b41-936f-46be-8a26-794cc9ceb2e9')) {
                 // This is the sendToWebhook call
                 res.setBody('{"success": true, "message": "Account ID received"}');
             }
