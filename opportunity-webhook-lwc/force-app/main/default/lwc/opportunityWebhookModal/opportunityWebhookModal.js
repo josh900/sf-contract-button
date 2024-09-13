@@ -23,24 +23,24 @@ export default class OpportunityWebhookModal extends LightningModal {
     }
 
     connectedCallback() {
-        console.log('OpportunityWebhookModal connected');
-        console.log('AccountId:', this.accountId);
-        console.log('OpportunityId:', this.opportunityId);
-        console.log('OpportunityFields:', JSON.stringify(this.opportunityFields));
+        // console.log('OpportunityWebhookModal connected');
+        // console.log('AccountId:', this.accountId);
+        // console.log('OpportunityId:', this.opportunityId);
+        // console.log('OpportunityFields:', JSON.stringify(this.opportunityFields));
         this.fetchWebhookData();
     }
 
     async fetchWebhookData() {
-        console.log('fetchWebhookData called');
+        // console.log('fetchWebhookData called');
         try {
             console.log('Calling getWebhookData with opportunityId:', this.opportunityId);
             const result = await getWebhookData({ 
                 id: this.opportunityId, 
                 isOpportunityId: true 
             });
-            console.log('getWebhookData result:', result);
-            console.log('Raw webhook response:', result);
-            console.log('Webhook data received:', result);
+            // console.log('getWebhookData result:', result);
+            // console.log('Raw webhook response:', result);
+            // console.log('Webhook data received:', result);
             if (result) {
                 try {
                     const parser = new DOMParser();
@@ -55,7 +55,7 @@ export default class OpportunityWebhookModal extends LightningModal {
                 } catch (e) {
                     this.htmlContent = result;
                 }
-                console.log('Processed webhook data:', this.htmlContent);
+                // console.log('Processed webhook data:', this.htmlContent);
                 this.isLoading = false;
             } else {
                 throw new Error('No data received from webhook');
@@ -83,12 +83,12 @@ export default class OpportunityWebhookModal extends LightningModal {
     }
 
     handleClose() {
-        console.log('Closing modal');
+        // console.log('Closing modal');
         this.close('Modal closed');
     }
 
     renderedCallback() {
-        console.log('Modal rendered. HTML content:', this.htmlContent);
+        // console.log('Modal rendered. HTML content:', this.htmlContent);
         if (this.htmlContent) {
             const container = this.template.querySelector('.webhook-content');
             if (container) {

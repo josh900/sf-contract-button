@@ -23,7 +23,7 @@ export default class OpportunityWebhookSection extends LightningElement {
     })
     wiredOpportunity({ error, data }) {
         if (data) {
-            console.log('Opportunity data loaded:', JSON.stringify(data));
+            // console.log('Opportunity data loaded:', JSON.stringify(data));
             this.opportunityData = data;
             this.error = undefined;
         } else if (error) {
@@ -59,9 +59,9 @@ export default class OpportunityWebhookSection extends LightningElement {
     }
 
     async handleOpenModal() {
-        console.log('handleOpenModal called, opportunityData:', JSON.stringify(this.opportunityData));
+        // console.log('handleOpenModal called, opportunityData:', JSON.stringify(this.opportunityData));
         if (this.isLoading) {
-            console.log('Data is still loading. Please wait.');
+            // console.log('Data is still loading. Please wait.');
             return;
         }
 
@@ -79,7 +79,7 @@ export default class OpportunityWebhookSection extends LightningElement {
         console.log('Opening modal with opportunity ID:', this.recordId);
 
         try {
-            console.log('Attempting to open modal...');
+            // console.log('Attempting to open modal...');
             const result = await OpportunityWebhookModal.open({
                 size: 'large',
                 description: 'Contract Preview Modal',
@@ -90,7 +90,7 @@ export default class OpportunityWebhookSection extends LightningElement {
                 }
             });
             console.log('Modal opened successfully');
-            console.log('Modal result:', JSON.stringify(result));
+            // console.log('Modal result:', JSON.stringify(result));
             if (result) {
                 this.webhookResponse = result;
             }
