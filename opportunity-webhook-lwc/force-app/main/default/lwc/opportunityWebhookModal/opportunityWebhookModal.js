@@ -3,31 +3,27 @@ import LightningModal from 'lightning/modal';
 import getWebhookData from '@salesforce/apex/OpportunityWebhookController.getWebhookData';
 
 export default class OpportunityWebhookModal extends LightningModal {
+    @api accountId;
     @api opportunityFields;
-    @api opportunityId;
     @track isLoading = true;
     @track htmlContent;
     @track error;
 
     connectedCallback() {
         console.log('OpportunityWebhookModal connected');
-        console.log('OpportunityId:', this.opportunityId);
+        console.log('AccountId:', this.accountId);
         console.log('OpportunityFields:', JSON.stringify(this.opportunityFields));
         this.fetchWebhookData();
     }
 
     async fetchWebhookData() {
         console.log('fetchWebhookData called');
-        if (!this.opportunityId) {
-            console.error('Opportunity ID is missing');
-            this.error = 'Opportunity ID is missing';
-            this.isLoading = false;
-            return;
-        }
-
         try {
-            console.log('Calling getWebhookData with opportunityId:', this.opportunityId);
-            const result = await getWebhookData({ id: this.opportunityId, isOpportunityId: true });
+            console.log('Calling getWebhookData with accountId:', this.accountId);
+            const result = await getWebhookData({ 
+                id: this.accountId, 
+                isOpportunityId: false 
+            });
             console.log('getWebhookData result:', result);
             console.log('Raw webhook response:', result);
             console.log('Webhook data received:', result);
