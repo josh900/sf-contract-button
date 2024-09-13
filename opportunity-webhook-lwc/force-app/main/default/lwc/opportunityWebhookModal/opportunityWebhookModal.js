@@ -29,7 +29,15 @@ export default class OpportunityWebhookModal extends LightningModal {
             console.log('Webhook data received:', result);
             if (result) {
                 try {
-                    this.htmlContent = JSON.parse(result);
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(result, 'text/html');
+                    const webhookDataDiv = doc.querySelector('.webhook-data');
+                    
+                    if (webhookDataDiv) {
+                        this.htmlContent = webhookDataDiv.innerHTML;
+                    } else {
+                        this.htmlContent = result;
+                    }
                 } catch (e) {
                     this.htmlContent = result;
                 }
