@@ -10,19 +10,23 @@ export default class OpportunityWebhookModal extends LightningModal {
     @track error;
 
     connectedCallback() {
-        console.log('OpportunityWebhookModal connected. AccountId:', this.accountId);
+        console.log('OpportunityWebhookModal connected');
+        console.log('AccountId:', this.accountId);
         console.log('OpportunityFields:', JSON.stringify(this.opportunityFields));
         this.fetchWebhookData();
     }
 
     async fetchWebhookData() {
         try {
+            console.log('Fetching webhook data');
+            console.log('AccountId:', this.accountId);
             console.log('Fetching webhook data for Account ID:', this.accountId);
             const result = await getWebhookData({ 
                 id: this.accountId, 
                 isOpportunityId: false 
             });
             console.log('Raw webhook response:', result);
+            console.log('Webhook data received:', result);
             if (result) {
                 try {
                     this.htmlContent = JSON.parse(result);
