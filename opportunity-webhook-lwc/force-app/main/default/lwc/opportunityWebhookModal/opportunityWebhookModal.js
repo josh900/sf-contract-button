@@ -3,27 +3,32 @@ import LightningModal from 'lightning/modal';
 import getWebhookData from '@salesforce/apex/OpportunityWebhookController.getWebhookData';
 
 export default class OpportunityWebhookModal extends LightningModal {
+    @api
+    set opportunityId(value) {
+        this._opportunityId = value;
+        console.log('OpportunityId set:', this._opportunityId);
+        if (this._opportunityId) {
+            this.fetchWebhookData();
+        }
+    }
+    get opportunityId() {
+        return this._opportunityId;
+    }
+
     @api opportunityFields;
-    @api opportunityId;
     @track isLoading = true;
     @track htmlContent;
     @track error;
 
     connectedCallback() {
         console.log('OpportunityWebhookModal connected');
-        console.log('OpportunityId:', this.opportunityId);
+        console.log('OpportunityId:', this._opportunityId);
         console.log('OpportunityFields:', JSON.stringify(this.opportunityFields));
-        if (this.opportunityId) {
-            this.fetchWebhookData();
-        } else {
-            this.error = 'Opportunity ID is missing';
-            this.isLoading = false;
-        }
     }
 
     async fetchWebhookData() {
         console.log('fetchWebhookData called');
-        if (!this.opportunityId) {
+        if (!this._opportunityId) {
             console.error('Opportunity ID is missing');
             this.error = 'Opportunity ID is missing';
             this.isLoading = false;
@@ -31,8 +36,8 @@ export default class OpportunityWebhookModal extends LightningModal {
         }
 
         try {
-            console.log('Calling getWebhookData with opportunityId:', this.opportunityId);
-            const result = await getWebhookData({ id: this.opportunityId, isOpportunityId: true });
+            console.log('Calling getWebhookData with opportunityId:', this._opportunityId);
+            const result = await getWebhookData({ id: this._opportunityId, isOpportunityId: true });
             console.log('getWebhookData result:', result);
             console.log('Raw webhook response:', result);
             if (result) {
