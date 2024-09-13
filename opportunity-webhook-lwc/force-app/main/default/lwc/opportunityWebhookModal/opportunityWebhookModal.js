@@ -38,6 +38,8 @@ export default class OpportunityWebhookModal extends LightningModal {
             } else {
                 throw new Error('No data received from webhook');
             }
+            this.htmlContent = result;
+            this.isLoading = false;
         } catch (error) {
             console.error('Error in fetchWebhookData:', error);
             this.error = error.message || JSON.stringify(error);
