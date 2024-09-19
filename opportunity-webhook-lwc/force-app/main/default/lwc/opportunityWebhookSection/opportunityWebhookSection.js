@@ -23,7 +23,6 @@ export default class OpportunityWebhookSection extends LightningElement {
     })
     wiredOpportunity({ error, data }) {
         if (data) {
-            // console.log('Opportunity data loaded:', JSON.stringify(data));
             this.opportunityData = data;
             this.error = undefined;
         } else if (error) {
@@ -91,3 +90,4 @@ export default class OpportunityWebhookSection extends LightningElement {
             console.error('Error opening modal:', JSON.stringify(error));
         }
     }
+}
