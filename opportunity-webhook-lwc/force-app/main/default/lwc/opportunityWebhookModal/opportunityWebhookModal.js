@@ -76,7 +76,7 @@ export default class OpportunityWebhookModal extends LightningModal {
         console.log('Submitting contract');
         this.isSubmitting = true;
         try {
-            const result = await sendToWebhook({ accountId: this.accountId });
+            const result = await sendToWebhook({ opportunityId: this.opportunityId });
             console.log('Webhook submission result:', result);
             this.close('Contract submitted');
         } catch (error) {

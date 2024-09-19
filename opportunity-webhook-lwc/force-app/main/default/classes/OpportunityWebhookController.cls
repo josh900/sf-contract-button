@@ -1,10 +1,10 @@
 public with sharing class OpportunityWebhookController {
     @AuraEnabled
-    public static String sendToWebhook(Id accountId) {
+    public static String sendToWebhook(Id opportunityId) {
         String webhookUrl = 'https://n8n.skoop.digital/webhook/c9401b41-936f-46be-8a26-794cc9ceb2e9';
         
         Map<String, String> payload = new Map<String, String>{
-            'accountId' => accountId
+            'opportunityId' => opportunityId
         };
         String jsonBody = JSON.serialize(payload);
         
