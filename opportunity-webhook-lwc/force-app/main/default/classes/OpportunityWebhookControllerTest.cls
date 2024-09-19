@@ -17,7 +17,6 @@ private class OpportunityWebhookControllerTest {
         // Verify the results
         System.assert(result.contains('"success": true'), 'Expected specific JSON response from sendToWebhook');
     }
-    
 
     @isTest
     static void testGetWebhookData() {
