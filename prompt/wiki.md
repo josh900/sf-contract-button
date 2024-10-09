@@ -935,6 +935,8 @@ Remember to grant the necessary permissions to users who need to access this fun
 
 
 
+
+
 Modifications to pricing:
 
 ----------------------
@@ -3703,14 +3705,2403 @@ Test with various scenarios (e.g., with and without discounts, with and without 
 --------------------
 
 
-write a compre
 
-fully covering all the details
+N8N Workflow:
+-----------------
 
-Includinde details such as:
-- hoe salesforce is involved and what fields, layouts, and configurations are involved and what they do.
+Create and send contract with sample data:
+```
+
+{
+  "meta": {
+    "instanceId": "9210707b971174140595281b7bbb92a444891e11137b3eed14db6c91cb424f1e"
+  },
+  "nodes": [
+    {
+      "parameters": {
+        "resource": "opportunity",
+        "operation": "get",
+        "opportunityId": "={{ $json[\"body\"][\"opportunityId\"] }}"
+      },
+      "id": "b1cc31f9-80d2-4524-af56-bc591dd38c8a",
+      "name": "getOpportunity",
+      "type": "n8n-nodes-base.salesforce",
+      "typeVersion": 1,
+      "position": [
+        560,
+        1100
+      ],
+      "credentials": {
+        "salesforceOAuth2Api": {
+          "id": "5Nrrpw8ruoN61MYg",
+          "name": "Salesforce account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "account",
+        "operation": "get",
+        "accountId": "={{ $json.AccountId }}"
+      },
+      "id": "baed0f5b-ab49-4e8e-904f-b9ba53b1053e",
+      "name": "getAccount",
+      "type": "n8n-nodes-base.salesforce",
+      "typeVersion": 1,
+      "position": [
+        740,
+        1100
+      ],
+      "credentials": {
+        "salesforceOAuth2Api": {
+          "id": "5Nrrpw8ruoN61MYg",
+          "name": "Salesforce account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "contact",
+        "operation": "getAll",
+        "returnAll": true,
+        "options": {
+          "conditionsUi": {
+            "conditionValues": [
+              {
+                "field": "AccountId",
+                "value": "={{ $json.Id }}"
+              }
+            ]
+          }
+        }
+      },
+      "id": "ac4e42e3-e318-4dbe-b1cd-2cd25f3d0b5b",
+      "name": "GetContacts",
+      "type": "n8n-nodes-base.salesforce",
+      "typeVersion": 1,
+      "position": [
+        960,
+        1100
+      ],
+      "credentials": {
+        "salesforceOAuth2Api": {
+          "id": "5Nrrpw8ruoN61MYg",
+          "name": "Salesforce account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "search",
+        "query": "=SELECT Id, FirstName, LastName, Email,\n(SELECT ContactId, Role \n FROM OpportunityContactRoles \n WHERE OpportunityId = '{{ $node[\"getOpportunity\"].json[\"Id\"] }}')\nFROM Contact\nWHERE Id IN \n(SELECT ContactId \n FROM OpportunityContactRole \n WHERE OpportunityId = '{{ $node[\"getOpportunity\"].json[\"Id\"] }}')"
+      },
+      "id": "68459614-1f22-4d22-b23e-c6aa53596404",
+      "name": "getRoles",
+      "type": "n8n-nodes-base.salesforce",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        1100
+      ],
+      "executeOnce": true,
+      "credentials": {
+        "salesforceOAuth2Api": {
+          "id": "5Nrrpw8ruoN61MYg",
+          "name": "Salesforce account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "2cf9ebef-4a3b-42b0-9b1d-e6f100bf5678",
+              "leftValue": "={{ $json.OpportunityContactRoles.records[0].Role }}",
+              "rightValue": "Contract Signer",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "d43ddeec-4445-490b-8f95-77ec80632c80",
+      "name": "FilterContractSigner",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        1100
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "password",
+              "value": "=A{{ $json.data.replace(/[^\\w!@#$%^&*()+]/gm, '') }}!2x"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e6e54659-af06-4581-9309-8d791ff4fdff",
+      "name": "Set",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        2540,
+        1100
+      ]
+    },
+    {
+      "parameters": {
+        "action": "generate",
+        "encodingType": "ascii",
+        "stringLength": 13
+      },
+      "id": "9e3247b6-4759-4ee3-ba58-81045c3441c2",
+      "name": "Crypto1",
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 1,
+      "position": [
+        2320,
+        1100
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "contact",
+        "operation": "get",
+        "contactId": "={{ $json[\"Id\"] }}"
+      },
+      "id": "68a82414-fb5e-4c85-aafd-79c8502590a3",
+      "name": "getContact",
+      "type": "n8n-nodes-base.salesforce",
+      "typeVersion": 1,
+      "position": [
+        1660,
+        1100
+      ],
+      "executeOnce": true,
+      "credentials": {
+        "salesforceOAuth2Api": {
+          "id": "5Nrrpw8ruoN61MYg",
+          "name": "Salesforce account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "search",
+        "query": "=SELECT Id, Quantity, UnitPrice, Product2.Name \nFROM OpportunityLineItem \nWHERE OpportunityId = '{{ $node[\"getOpportunity\"].json[\"Id\"] }}'"
+      },
+      "id": "0e3e66ec-b7ce-4bda-a873-78f3ced2df1b",
+      "name": "getPricing",
+      "type": "n8n-nodes-base.salesforce",
+      "typeVersion": 1,
+      "position": [
+        1880,
+        1100
+      ],
+      "executeOnce": true,
+      "credentials": {
+        "salesforceOAuth2Api": {
+          "id": "5Nrrpw8ruoN61MYg",
+          "name": "Salesforce account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Helper functions\nconst formatCurrency = (value) => `$${value.toFixed(2)}`;\nconst formatPercentage = (value) => `${value.toFixed(2)}%`;\n\n// Get the items from the input\nconst items = $input.all();\n\n// Get global discount flag\nconst applyDiscounts = $node[\"getOpportunity\"].json[\"Discount__c\"];\n\n// Initialize arrays for each column\nconst products = [];\nconst listPrices = [];\nconst quantities = [];\nconst discounts = [];\nconst promotionalPrices = [];\nconst promotionalDurations = [];\nconst netFixedPrices = [];\nconst netRecurringPrices = [];\n\nlet totalNetFixedPrice = 0;\nlet totalNetRecurringPrice = 0;\nlet totalPromotionalPrice = 0;\n\n// Process each item\nitems.forEach(item => {\n  const product = item.json;\n  const quantity = product.Quantity;\n  const listPrice = product.UnitPrice;\n  \n  // Calculate discount\n  let discount = 0;\n  if (applyDiscounts) {\n    if (product.Product2.Name.includes(\"Skoop Stick\")) {\n      discount = $node[\"getOpportunity\"].json[\"Skoop_Stick_Per_Unit_Discount__c\"] / 100;\n    } else if (product.Product2.Name.includes(\"Implementation Fee\")) {\n      discount = $node[\"getOpportunity\"].json[\"Implementation_Fee_Discount__c\"] / 100;\n    }\n    // Add more product-specific discount calculations here if needed\n  }\n  \n  // Calculate prices\n  const discountedPrice = listPrice * (1 - discount);\n  const promotionalPrice = product.Promotional_Price__c || null;\n  const promotionalDuration = product.Promotional_Duration__c || null;\n  \n  let netPrice;\n  if (promotionalPrice !== null) {\n    netPrice = promotionalPrice;\n    totalPromotionalPrice += netPrice * quantity;\n  } else {\n    netPrice = discountedPrice;\n  }\n  \n  // Determine if it's a fixed or recurring price\n  if (product.Product2.Name.includes(\"Skoop Stick\") || product.Product2.Name.includes(\"Implementation Fee\")) {\n    totalNetFixedPrice += netPrice * quantity;\n    netFixedPrices.push(formatCurrency(netPrice * quantity));\n    netRecurringPrices.push(\"\");\n  } else {\n    totalNetRecurringPrice += netPrice * quantity;\n    netFixedPrices.push(\"\");\n    netRecurringPrices.push(formatCurrency(netPrice * quantity));\n  }\n  \n  // Push values to respective arrays\n  products.push(product.Product2.Name);\n  listPrices.push(formatCurrency(listPrice));\n  quantities.push(quantity.toString());\n  discounts.push(formatPercentage(discount * 100));\n  promotionalPrices.push(promotionalPrice ? formatCurrency(promotionalPrice) : \"\");\n  promotionalDurations.push(promotionalDuration ? `${promotionalDuration} days` : \"\");\n});\n\n// Add totals row\nproducts.push(\"Totals\");\nlistPrices.push(\"\");\nquantities.push(\"\");\ndiscounts.push(\"\");\npromotionalPrices.push(\"\");\npromotionalDurations.push(\"\");\nnetFixedPrices.push(formatCurrency(totalNetFixedPrice));\nnetRecurringPrices.push(formatCurrency(totalNetRecurringPrice));\n\n// Add promotional total row if applicable\nif (totalPromotionalPrice > 0) {\n  products.push(\"Promotional Total\");\n  listPrices.push(\"\");\n  quantities.push(\"\");\n  discounts.push(\"\");\n  promotionalPrices.push(\"\");\n  promotionalDurations.push(\"\");\n  netFixedPrices.push(formatCurrency(totalNetFixedPrice));\n  netRecurringPrices.push(formatCurrency(totalPromotionalPrice));\n}\n\n// Create the final JSON structure\nconst pricingBlock = [\n  {\n    name: \"Products\",\n    list: products.map(product => ({ title: product, font_style: product.includes(\"Total\") ? \"Bold\" : \"Normal\" }))\n  },\n  {\n    name: \"List Price\",\n    list: listPrices.map(price => ({ title: price, font_style: \"Normal\" }))\n  },\n  {\n    name: \"Quantity\",\n    list: quantities.map(qty => ({ title: qty, font_style: \"Normal\" }))\n  }\n];\n\n// Only include discount column if discounts are applied\nif (applyDiscounts) {\n  pricingBlock.push({\n    name: \"Discount\",\n    list: discounts.map(discount => ({ title: discount, font_style: \"Normal\" }))\n  });\n}\n\n// Only include promotional columns if there are promotional prices\nif (promotionalPrices.some(price => price !== \"\")) {\n  pricingBlock.push(\n    {\n      name: \"Promotional Price\",\n      list: promotionalPrices.map(price => ({ title: price, font_style: \"Normal\" }))\n    },\n    {\n      name: \"Promotional Duration\",\n      list: promotionalDurations.map(duration => ({ title: duration, font_style: \"Normal\" }))\n    }\n  );\n}\n\npricingBlock.push(\n  {\n    name: \"Net Fixed Price\",\n    list: netFixedPrices.map(price => ({ title: price, font_style: \"Normal\" }))\n  },\n  {\n    name: \"Net Recurring Price\",\n    list: netRecurringPrices.map(price => ({ title: price, font_style: \"Normal\" }))\n  }\n);\n\nreturn {\n  json: {\n    pricing_block: JSON.stringify(pricingBlock)\n  }\n};"
+      },
+      "id": "39d2e748-fcaa-4cdc-8b4c-82a43a1cc517",
+      "name": "formatPricingBlock",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2100,
+        1100
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api-v2.skoopsignage.app/users/create-user",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"add_reseller_super_admin\": true,\n  \"contract_expiry\": \"2024-10-16T00:00:00Z\",\n  \"email\": \"josh900_test_rofssqj9@mailsac.com\",\n  \"firstName\": \"{{ $node[\"getContact\"].json[\"FirstName\"] }}\",\n  \"lastName\": \"{{ $node[\"getContact\"].json[\"LastName\"] }}\",\n  \"organization_info\": {\n    \"name\": \"{{ $node[\"getAccount\"].json[\"Name\"] }}\",\n    \"white_label\": \"SKOOP\"\n  },\n  \"password\": \"{{ $json.password }}\",\n  \"payment_terms\": \"{{ $node[\"getOpportunity\"].json[\"Payment_Terms__c\"] }}\",\n  \"pricing_block\": {{ JSON.stringify($node[\"formatPricingBlock\"].json[\"pricing_block\"]) }},\n  \"renewal_term\": \"{{ $node[\"getOpportunity\"].json[\"Renewal_Terms__c\"] }}\",\n  \"send_out_invoice\": true,\n  \"term\": \"{{ $node[\"getOpportunity\"].json[\"Term__c\"] }}\",\n  \"phone_number\": \"{{ $node[\"getContact\"].json[\"Phone\"].replace(/[^\\d]/g, '') }}\"\n}",
+        "options": {}
+      },
+      "id": "e4ce7be8-cb70-4ab2-87bb-2849b96a2cac",
+      "name": "Create Skoop User1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2780,
+        1100
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "opportunity",
+        "operation": "update",
+        "opportunityId": "={{ $node[\"getOpportunity\"].json[\"Id\"] }}",
+        "updateFields": {
+          "customFieldsUi": {
+            "customFieldsValues": [
+              {
+                "fieldId": "API_Updated_Field__c",
+                "value": "=Sent on {{ $now.format('LLL dd, yyyy') }}"
+              },
+              {
+                "fieldId": "skoop_org_id__c",
+                "value": "={{ $json[\"data\"][\"defaultOrg\"][\"organization_id\"] }}"
+              }
+            ]
+          }
+        }
+      },
+      "id": "1495cdd6-1e4e-4140-bfcd-803554e06f90",
+      "name": "updateContractStatus1",
+      "type": "n8n-nodes-base.salesforce",
+      "typeVersion": 1,
+      "position": [
+        3000,
+        1080
+      ],
+      "credentials": {
+        "salesforceOAuth2Api": {
+          "id": "5Nrrpw8ruoN61MYg",
+          "name": "Salesforce account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C04P8TE35RS",
+          "mode": "list",
+          "cachedResultName": "test1"
+        },
+        "text": "=*🚀* Client Contract Sent - *{{ $node[\"getAccount\"].json[\"Name\"] }}*\nhttps://d3h000005wljmeac.lightning.force.com/lightning/r/Opportunity/006VW00000ACeS9YAL/view\n<https://d3h000005wljmeac.lightning.force.com/lightning/r/Account/001VW000007zElIYAU/view|*Account*>",
+        "otherOptions": {
+          "mrkdwn": true
+        }
+      },
+      "id": "04d35af7-fb9a-42b5-b380-301868fcbaed",
+      "name": "Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [
+        3220,
+        1080
+      ],
+      "credentials": {
+        "slackApi": {
+          "id": "9ZpOJ3OaY7wODuwd",
+          "name": "Slack Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "c9401b41-936f-46be-8a26-794cc9ceb2e9",
+        "options": {}
+      },
+      "id": "31e94056-821c-4006-b003-0b92132b4826",
+      "name": "Webhook3",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        280,
+        1120
+      ],
+      "webhookId": "c9401b41-936f-46be-8a26-794cc9ceb2e9"
+    }
+  ],
+  "connections": {
+    "getOpportunity": {
+      "main": [
+        [
+          {
+            "node": "getAccount",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "getAccount": {
+      "main": [
+        [
+          {
+            "node": "GetContacts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetContacts": {
+      "main": [
+        [
+          {
+            "node": "getRoles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "getRoles": {
+      "main": [
+        [
+          {
+            "node": "FilterContractSigner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FilterContractSigner": {
+      "main": [
+        [
+          {
+            "node": "getContact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set": {
+      "main": [
+        [
+          {
+            "node": "Create Skoop User1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crypto1": {
+      "main": [
+        [
+          {
+            "node": "Set",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "getContact": {
+      "main": [
+        [
+          {
+            "node": "getPricing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "getPricing": {
+      "main": [
+        [
+          {
+            "node": "formatPricingBlock",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "formatPricingBlock": {
+      "main": [
+        [
+          {
+            "node": "Crypto1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Skoop User1": {
+      "main": [
+        [
+          {
+            "node": "updateContractStatus1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "updateContractStatus1": {
+      "main": [
+        [
+          {
+            "node": "Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook3": {
+      "main": [
+        [
+          {
+            "node": "getOpportunity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "getOpportunity": [
+      {
+        "attributes": {
+          "type": "Opportunity",
+          "url": "/services/data/v59.0/sobjects/Opportunity/006VW00000ACeS9YAL"
+        },
+        "Id": "006VW00000ACeS9YAL",
+        "IsDeleted": false,
+        "AccountId": "001VW000007zElIYAU",
+        "Name": "Test Opp",
+        "Description": "Test for dev team.",
+        "StageName": "Negotiation",
+        "Amount": 604.91,
+        "Probability": 60,
+        "CloseDate": "2024-12-31",
+        "Type": "New Business",
+        "NextStep": "Test",
+        "LeadSource": "Advertisement",
+        "IsClosed": false,
+        "IsWon": false,
+        "ForecastCategory": "Pipeline",
+        "ForecastCategoryName": "Pipeline",
+        "CampaignId": null,
+        "HasOpportunityLineItem": true,
+        "Pricebook2Id": "01s3h000004zqj7AAA",
+        "OwnerId": "0053h000006sdovAAA",
+        "CreatedDate": "2024-09-09T14:40:57.000+0000",
+        "CreatedById": "0053h000006sdovAAA",
+        "LastModifiedDate": "2024-09-20T04:19:01.000+0000",
+        "LastModifiedById": "0053h000002J5zoAAC",
+        "SystemModstamp": "2024-09-20T04:19:01.000+0000",
+        "LastActivityDate": null,
+        "PushCount": 0,
+        "LastStageChangeDate": "2024-09-13T21:08:48.000+0000",
+        "FiscalQuarter": 4,
+        "FiscalYear": 2024,
+        "Fiscal": "2024 4",
+        "ContactId": null,
+        "LastViewedDate": "2024-09-20T04:39:12.000+0000",
+        "LastReferencedDate": "2024-09-20T04:39:12.000+0000",
+        "HasOpenActivity": false,
+        "HasOverdueTask": false,
+        "LastAmountChangedHistoryId": "008VW00000EiOLAYA3",
+        "LastCloseDateChangedHistoryId": null,
+        "Follow_Up__c": false,
+        "Term__c": 12,
+        "MRR__c": 50.41,
+        "product_type__c": null,
+        "ActiveCamp__ActiveCampaign_Sync_Status__c": null,
+        "ActiveCamp__Last_Synced__c": null,
+        "TrulyActivity__Count_Pushed_Back__c": null,
+        "TrulyActivity__Days_In_Stage__c": null,
+        "TrulyActivity__Days_Pushed_Back__c": null,
+        "TrulyActivity__Days_Since_Last_Activity__c": null,
+        "TrulyActivity__Days_Since_Last_Event__c": null,
+        "TrulyActivity__Days_Since_Last_Modified__c": 1,
+        "TrulyActivity__Days_Until_Next_Event__c": null,
+        "TrulyActivity__Last_Touch_Channel__c": null,
+        "TrulyActivity__Next_Meeting_Scheduled__c": false,
+        "TrulyActivity__Outbound_Touches_Since_Last_Engagement__c": null,
+        "TrulyActivity__TalkTime_Mins_In_Stage__c": null,
+        "TrulyActivity__Time_Since_Last_Engagement__c": null,
+        "TrulyActivity__Time_Since_Last_Outbound_Touch__c": null,
+        "TrulyActivity__Truly_Opportunity__c": "a13VW00000DwdvxYAB",
+        "Misc_Product__c": "Skoop 55' TV Screen",
+        "Misc_Product_Discount__c": 10,
+        "Misc_Product_Price__c": 479.99,
+        "Start_Date__c": null,
+        "Renewal_Terms__c": "1-year in terms cancellable on 90 days' notice",
+        "Payment_Terms__c": "Billed Monthly, Auto Renewing",
+        "Term_Date__c": "2024-09-27",
+        "Total_One_Time_Fee__c": 3603.96,
+        "Skoop_Stick_Quantity__c": 14,
+        "Skoop_Stick_Total_Cost__c": 1344,
+        "Implementation_Fee_Discount__c": null,
+        "Menu_Redesign_Fee_Discount__c": null,
+        "Job_Title__c": null,
+        "Menu_Redesign_Fee__c": 499,
+        "Skoop_Stick_Per_Unit_Discount__c": 20,
+        "Skoop_Stick_Per_Unit_Cost__c": 96,
+        "Discount__c": true,
+        "POS__c": "Dutchie",
+        "Competitor__c": "N/A",
+        "Net_Misc_Product_Price__c": 2159.96,
+        "Misc_Product_Quantity__c": 5,
+        "Misc_Product_Checkbox__c": true,
+        "ScreenCount__c": null,
+        "Location_Count__c": 1,
+        "ARR__c": 7258.92,
+        "TCV__c": 10862.88,
+        "Date_Onboarded__c": null,
+        "Renewal_Date__c": null,
+        "Closed_Lost_Reason__c": null,
+        "MRR1__c": 604.91,
+        "Features__c": "ETV",
+        "Accounting_MRR_Change__c": false,
+        "Customer_Status__c": null,
+        "Churn_Reason__c": null,
+        "Implementation_Fee__c": 100,
+        "Pain_Points__c": "<p>Test</p>",
+        "Blockers__c": "<p>Test</p>",
+        "Decision_Maker__c": true,
+        "Contact_Contract_Fields__c": true,
+        "Total_Screen_Count__c": 14,
+        "Account_Address__c": "295 Lillian LnAnnistonAL36207US",
+        "Meeting_Complete_Date__c": "2024-09-09",
+        "DM_Engaged_Date__c": null,
+        "Negotiation_Date__c": "2024-09-13",
+        "Contract_Expiration_Date__c": null,
+        "Contract_Sent_Date__c": null,
+        "Assigned_BDR__c": "0053h000006sdovAAA",
+        "Estimated_MRR__c": 605,
+        "Estimated_ARR__c": 7260,
+        "Opportunity_ID__c": "006VW00000ACeS9YAL",
+        "API_Updated_Field__c": "Sent on Sep 20, 2024",
+        "Demo_Date__c": "2024-09-09",
+        "skoop_org_id__c": 4463,
+        "contract_url__c": null,
+        "Promotional_Price__c": null,
+        "Promotional_Duration__c": null
+      }
+    ],
+    "getAccount": [
+      {
+        "attributes": {
+          "type": "Account",
+          "url": "/services/data/v59.0/sobjects/Account/001VW000007zElIYAU"
+        },
+        "Id": "001VW000007zElIYAU",
+        "IsDeleted": false,
+        "MasterRecordId": null,
+        "Name": "Skoop Test Inc",
+        "Type": null,
+        "ParentId": null,
+        "BillingStreet": "295 Lillian Ln",
+        "BillingCity": "Anniston",
+        "BillingState": "AL",
+        "BillingPostalCode": "36207",
+        "BillingCountry": "US",
+        "BillingLatitude": null,
+        "BillingLongitude": null,
+        "BillingGeocodeAccuracy": null,
+        "BillingAddress": {
+          "city": "Anniston",
+          "country": "US",
+          "geocodeAccuracy": null,
+          "latitude": null,
+          "longitude": null,
+          "postalCode": "36207",
+          "state": "AL",
+          "street": "295 Lillian Ln"
+        },
+        "ShippingStreet": null,
+        "ShippingCity": null,
+        "ShippingState": null,
+        "ShippingPostalCode": null,
+        "ShippingCountry": null,
+        "ShippingLatitude": null,
+        "ShippingLongitude": null,
+        "ShippingGeocodeAccuracy": null,
+        "ShippingAddress": null,
+        "Phone": "2564868006",
+        "Fax": null,
+        "Website": "www.testtes.com",
+        "PhotoUrl": "/services/images/photo/001VW000007zElIYAU",
+        "Industry": "Cannabis",
+        "AnnualRevenue": null,
+        "NumberOfEmployees": null,
+        "Description": null,
+        "OwnerId": "0053h000006sdovAAA",
+        "CreatedDate": "2024-04-05T19:11:16.000+0000",
+        "CreatedById": "0053h000006sdovAAA",
+        "LastModifiedDate": "2024-09-09T15:01:06.000+0000",
+        "LastModifiedById": "0053h000002J5zoAAC",
+        "SystemModstamp": "2024-09-19T20:54:21.000+0000",
+        "LastActivityDate": "2024-09-19",
+        "LastViewedDate": "2024-09-20T04:39:12.000+0000",
+        "LastReferencedDate": "2024-09-20T04:39:12.000+0000",
+        "Jigsaw": null,
+        "JigsawCompanyId": null,
+        "AccountSource": "Advertisement",
+        "SicDesc": null,
+        "Copy_Billing_Address_to_Shipping_Address__c": false,
+        "rh2__Describe__c": null,
+        "Screen_Count_NEW__c": null,
+        "ActiveCamp__ActiveCampaign_Id__c": "229",
+        "ActiveCamp__ActiveCampaign_Sync_Status__c": "Successfully Synced",
+        "ActiveCamp__Last_Synced__c": "2024-09-09T15:01:06.000+0000",
+        "TrulyActivity__ABS_Stage__c": "Customer",
+        "TrulyActivity__Cadence_Step__c": 0,
+        "TrulyActivity__Email_Domain__c": "gmail.com",
+        "TrulyActivity__Email_Only_Sync_Contact_Matches__c": false,
+        "TrulyActivity__Last_Assigned_By__c": "0053h000006sdovAAA",
+        "TrulyActivity__Last_Assigned__c": "2024-04-05T19:11:16.000+0000",
+        "TrulyActivity__Truly_Account_Domain_V2__c": "www.testtes.com",
+        "jira_id__c": null,
+        "Screen_Count__c": null,
+        "Account_Status__c": null,
+        "MRR__c": null,
+        "Skoop_Stick_Serial_No__c": null,
+        "POS__c": "Dutchie",
+        "Hardware__c": null,
+        "Skoop_Package__c": null,
+        "Term__c": null,
+        "Competitor__c": "N/A",
+        "Account_Status_New__c": "Pending",
+        "Deliverables__c": null,
+        "Location_Count__c": 4,
+        "rh2__testCurrency__c": null,
+        "Total_MRR__c": 0,
+        "Total_Screen_Count__c": 0
+      }
+    ],
+    "GetContacts": [
+      {
+        "attributes": {
+          "type": "Contact",
+          "url": "/services/data/v59.0/sobjects/Contact/003VW00000HJjsTYAT"
+        },
+        "Id": "003VW00000HJjsTYAT",
+        "FirstName": "josh test",
+        "LastName": "test",
+        "Email": "murra178@gmail.com"
+      },
+      {
+        "attributes": {
+          "type": "Contact",
+          "url": "/services/data/v59.0/sobjects/Contact/003VW000007r8OPYAY"
+        },
+        "Id": "003VW000007r8OPYAY",
+        "FirstName": "Trevor",
+        "LastName": "James Roberts",
+        "Email": "tjroberts13@gmail.com"
+      }
+    ],
+    "getRoles": [
+      {
+        "attributes": {
+          "type": "Contact",
+          "url": "/services/data/v59.0/sobjects/Contact/003VW00000HJjsTYAT"
+        },
+        "Id": "003VW00000HJjsTYAT",
+        "FirstName": "josh test",
+        "LastName": "test",
+        "Email": "murra178@gmail.com",
+        "OpportunityContactRoles": {
+          "totalSize": 1,
+          "done": true,
+          "records": [
+            {
+              "attributes": {
+                "type": "OpportunityContactRole",
+                "url": "/services/data/v59.0/sobjects/OpportunityContactRole/00KVW00000928An2AI"
+              },
+              "ContactId": "003VW00000HJjsTYAT",
+              "Role": "Contract Signer"
+            }
+          ]
+        }
+      }
+    ],
+    "FilterContractSigner": [
+      {
+        "attributes": {
+          "type": "Contact",
+          "url": "/services/data/v59.0/sobjects/Contact/003VW00000HJjsTYAT"
+        },
+        "Id": "003VW00000HJjsTYAT",
+        "FirstName": "josh test",
+        "LastName": "test",
+        "Email": "murra178@gmail.com",
+        "OpportunityContactRoles": {
+          "totalSize": 1,
+          "done": true,
+          "records": [
+            {
+              "attributes": {
+                "type": "OpportunityContactRole",
+                "url": "/services/data/v59.0/sobjects/OpportunityContactRole/00KVW00000928An2AI"
+              },
+              "ContactId": "003VW00000HJjsTYAT",
+              "Role": "Contract Signer"
+            }
+          ]
+        }
+      }
+    ],
+    "Set": [
+      {
+        "pricing_block": "[{\"name\":\"Products\",\"list\":[{\"title\":\"Educational TV\",\"font_style\":\"Normal\"},{\"title\":\"Skoop Signage - Essentials\",\"font_style\":\"Normal\"},{\"title\":\"Skoop Signage - Pro\",\"font_style\":\"Normal\"},{\"title\":\"Totals\",\"font_style\":\"Bold\"}]},{\"name\":\"List Price\",\"list\":[{\"title\":\"$10.00\",\"font_style\":\"Normal\"},{\"title\":\"$20.00\",\"font_style\":\"Normal\"},{\"title\":\"$54.99\",\"font_style\":\"Normal\"},{\"title\":\"\",\"font_style\":\"Normal\"}]},{\"name\":\"Quantity\",\"list\":[{\"title\":\"1\",\"font_style\":\"Normal\"},{\"title\":\"5\",\"font_style\":\"Normal\"},{\"title\":\"9\",\"font_style\":\"Normal\"},{\"title\":\"\",\"font_style\":\"Normal\"}]},{\"name\":\"Discount\",\"list\":[{\"title\":\"0.00%\",\"font_style\":\"Normal\"},{\"title\":\"0.00%\",\"font_style\":\"Normal\"},{\"title\":\"0.00%\",\"font_style\":\"Normal\"},{\"title\":\"\",\"font_style\":\"Normal\"}]},{\"name\":\"Net Fixed Price\",\"list\":[{\"title\":\"\",\"font_style\":\"Normal\"},{\"title\":\"\",\"font_style\":\"Normal\"},{\"title\":\"\",\"font_style\":\"Normal\"},{\"title\":\"$0.00\",\"font_style\":\"Normal\"}]},{\"name\":\"Net Recurring Price\",\"list\":[{\"title\":\"$10.00\",\"font_style\":\"Normal\"},{\"title\":\"$100.00\",\"font_style\":\"Normal\"},{\"title\":\"$494.91\",\"font_style\":\"Normal\"},{\"title\":\"$604.91\",\"font_style\":\"Normal\"}]}]",
+        "data": "V[|\u0002}#k>R!\r\n|",
+        "password": "AV#kR!!2x"
+      }
+    ],
+    "Crypto1": [
+      {
+        "pricing_block": "[{\"name\":\"Products\",\"list\":[{\"title\":\"Educational TV\",\"font_style\":\"Normal\"},{\"title\":\"Skoop Signage - Essentials\",\"font_style\":\"Normal\"},{\"title\":\"Skoop Signage - Pro\",\"font_style\":\"Normal\"},{\"title\":\"Totals\",\"font_style\":\"Bold\"}]},{\"name\":\"List Price\",\"list\":[{\"title\":\"$10.00\",\"font_style\":\"Normal\"},{\"title\":\"$20.00\",\"font_style\":\"Normal\"},{\"title\":\"$54.99\",\"font_style\":\"Normal\"},{\"title\":\"\",\"font_style\":\"Normal\"}]},{\"name\":\"Quantity\",\"list\":[{\"title\":\"1\",\"font_style\":\"Normal\"},{\"title\":\"5\",\"font_style\":\"Normal\"},{\"title\":\"9\",\"font_style\":\"Normal\"},{\"title\":\"\",\"font_style\":\"Normal\"}]},{\"name\":\"Discount\",\"list\":[{\"title\":\"0.00%\",\"font_style\":\"Normal\"},{\"title\":\"0.00%\",\"font_style\":\"Normal\"},{\"title\":\"0.00%\",\"font_style\":\"Normal\"},{\"title\":\"\",\"font_style\":\"Normal\"}]},{\"name\":\"Net Fixed Price\",\"list\":[{\"title\":\"\",\"font_style\":\"Normal\"},{\"title\":\"\",\"font_style\":\"Normal\"},{\"title\":\"\",\"font_style\":\"Normal\"},{\"title\":\"$0.00\",\"font_style\":\"Normal\"}]},{\"name\":\"Net Recurring Price\",\"list\":[{\"title\":\"$10.00\",\"font_style\":\"Normal\"},{\"title\":\"$100.00\",\"font_style\":\"Normal\"},{\"title\":\"$494.91\",\"font_style\":\"Normal\"},{\"title\":\"$604.91\",\"font_style\":\"Normal\"}]}]",
+        "data": "V[|\u0002}#k>R!\r\n|"
+      }
+    ],
+    "getContact": [
+      {
+        "attributes": {
+          "type": "Contact",
+          "url": "/services/data/v59.0/sobjects/Contact/003VW00000HJjsTYAT"
+        },
+        "Id": "003VW00000HJjsTYAT",
+        "IsDeleted": false,
+        "MasterRecordId": null,
+        "AccountId": "001VW000007zElIYAU",
+        "LastName": "test",
+        "FirstName": "josh test",
+        "Salutation": null,
+        "Name": "josh test test",
+        "OtherStreet": null,
+        "OtherCity": null,
+        "OtherState": null,
+        "OtherPostalCode": null,
+        "OtherCountry": null,
+        "OtherLatitude": null,
+        "OtherLongitude": null,
+        "OtherGeocodeAccuracy": null,
+        "OtherAddress": null,
+        "MailingStreet": "295 Lillian Ln",
+        "MailingCity": "Anniston",
+        "MailingState": "AL",
+        "MailingPostalCode": "36207",
+        "MailingCountry": "US",
+        "MailingLatitude": null,
+        "MailingLongitude": null,
+        "MailingGeocodeAccuracy": null,
+        "MailingAddress": {
+          "city": "Anniston",
+          "country": "US",
+          "geocodeAccuracy": null,
+          "latitude": null,
+          "longitude": null,
+          "postalCode": "36207",
+          "state": "AL",
+          "street": "295 Lillian Ln"
+        },
+        "Phone": "2564868006",
+        "Fax": null,
+        "MobilePhone": null,
+        "HomePhone": null,
+        "OtherPhone": null,
+        "AssistantPhone": null,
+        "ReportsToId": null,
+        "Email": "murra178@gmail.com",
+        "Title": null,
+        "Department": null,
+        "AssistantName": null,
+        "LeadSource": "Advertisement",
+        "Birthdate": null,
+        "Description": null,
+        "OwnerId": "0053h000002J5zoAAC",
+        "CreatedDate": "2024-09-18T15:48:14.000+0000",
+        "CreatedById": "0053h000002J5zoAAC",
+        "LastModifiedDate": "2024-09-18T16:11:26.000+0000",
+        "LastModifiedById": "0053h000002J5zoAAC",
+        "SystemModstamp": "2024-09-19T20:54:21.000+0000",
+        "LastActivityDate": "2024-09-19",
+        "LastCURequestDate": null,
+        "LastCUUpdateDate": null,
+        "LastViewedDate": "2024-09-20T04:39:12.000+0000",
+        "LastReferencedDate": "2024-09-20T04:39:12.000+0000",
+        "EmailBouncedReason": null,
+        "EmailBouncedDate": null,
+        "IsEmailBounced": false,
+        "PhotoUrl": "/services/images/photo/003VW00000HJjsTYAT",
+        "Jigsaw": null,
+        "JigsawContactId": null,
+        "IndividualId": null,
+        "IsPriorityRecord": false,
+        "Type__c": null,
+        "ActiveCamp__Account_Relation_Sync_Status__c": "Successfully Synced",
+        "ActiveCamp__ActiveCampaign_Sync_Status__c": "Successfully Synced",
+        "ActiveCamp__Active_Campaign_Id__c": "179",
+        "ActiveCamp__Last_Synced__c": "2024-09-18T16:11:26.000+0000",
+        "sansancard__CreatedByScanToSalesforce__c": false,
+        "rh2__Currency_Test__c": null,
+        "rh2__Describe__c": null,
+        "rh2__Integer_Test__c": null,
+        "rh2__Formula_Test__c": 0
+      }
+    ],
+    "getPricing": [
+      {
+        "attributes": {
+          "type": "OpportunityLineItem",
+          "url": "/services/data/v59.0/sobjects/OpportunityLineItem/00kVW000009fTwvYAE"
+        },
+        "Id": "00kVW000009fTwvYAE",
+        "Quantity": 1,
+        "UnitPrice": 10,
+        "Product2": {
+          "attributes": {
+            "type": "Product2",
+            "url": "/services/data/v59.0/sobjects/Product2/01tVW000007rtOxYAI"
+          },
+          "Name": "Educational TV"
+        }
+      },
+      {
+        "attributes": {
+          "type": "OpportunityLineItem",
+          "url": "/services/data/v59.0/sobjects/OpportunityLineItem/00kVW000009fTwwYAE"
+        },
+        "Id": "00kVW000009fTwwYAE",
+        "Quantity": 5,
+        "UnitPrice": 20,
+        "Product2": {
+          "attributes": {
+            "type": "Product2",
+            "url": "/services/data/v59.0/sobjects/Product2/01t3h000003TEFlAAO"
+          },
+          "Name": "Skoop Signage - Essentials"
+        }
+      },
+      {
+        "attributes": {
+          "type": "OpportunityLineItem",
+          "url": "/services/data/v59.0/sobjects/OpportunityLineItem/00kVW000009fTwxYAE"
+        },
+        "Id": "00kVW000009fTwxYAE",
+        "Quantity": 9,
+        "UnitPrice": 54.99,
+        "Product2": {
+          "attributes": {
+            "type": "Product2",
+            "url": "/services/data/v59.0/sobjects/Product2/01t3h000003TEFqAAO"
+          },
+          "Name": "Skoop Signage - Pro"
+        }
+      }
+    ],
+    "Slack": [
+      {
+        "ok": true,
+        "channel": "C04P8TE35RS",
+        "message": {
+          "user": "U04P8TEHFEY",
+          "type": "message",
+          "ts": "1726876085.851479",
+          "bot_id": "B04P6DKT4SW",
+          "app_id": "A04PK2C9F5F",
+          "text": "*:rocket:* Client Contract Sent - *Skoop Test Inc*\n<https://d3h000005wljmeac.lightning.force.com/lightning/r/Opportunity/006VW00000ACeS9YAL/view>\n<https://d3h000005wljmeac.lightning.force.com/lightning/r/Account/001VW000007zElIYAU/view|*Account*>\n_Automated with this <https://n8n.skoop.digital/workflow/ijnafLjAgtvP5Qqp?utm_source=n8n-internal&amp;utm_medium=powered_by&amp;utm_campaign=n8n-nodes-base.slack_9210707b971174140595281b7bbb92a444891e11137b3eed14db6c91cb424f1e|n8n workflow>_",
+          "team": "T012BLTMZV4",
+          "bot_profile": {
+            "id": "B04P6DKT4SW",
+            "app_id": "A04PK2C9F5F",
+            "name": "Assistant",
+            "icons": {
+              "image_36": "https://avatars.slack-edge.com/2023-02-11/4774021106919_dc38b491fd2e6228df97_36.png",
+              "image_48": "https://avatars.slack-edge.com/2023-02-11/4774021106919_dc38b491fd2e6228df97_48.png",
+              "image_72": "https://avatars.slack-edge.com/2023-02-11/4774021106919_dc38b491fd2e6228df97_72.png"
+            },
+            "deleted": false,
+            "updated": 1724648032,
+            "team_id": "T012BLTMZV4"
+          },
+          "blocks": [
+            {
+              "type": "rich_text",
+              "block_id": "E7G",
+              "elements": [
+                {
+                  "type": "rich_text_section",
+                  "elements": [
+                    {
+                      "type": "emoji",
+                      "name": "rocket",
+                      "unicode": "1f680",
+                      "style": {
+                        "bold": true
+                      }
+                    },
+                    {
+                      "type": "text",
+                      "text": " Client Contract Sent - "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Skoop Test Inc",
+                      "style": {
+                        "bold": true
+                      }
+                    },
+                    {
+                      "type": "text",
+                      "text": "\n"
+                    },
+                    {
+                      "type": "link",
+                      "url": "https://d3h000005wljmeac.lightning.force.com/lightning/r/Opportunity/006VW00000ACeS9YAL/view"
+                    },
+                    {
+                      "type": "text",
+                      "text": "\n"
+                    },
+                    {
+                      "type": "link",
+                      "url": "https://d3h000005wljmeac.lightning.force.com/lightning/r/Account/001VW000007zElIYAU/view",
+                      "text": "Account",
+                      "style": {
+                        "bold": true
+                      }
+                    },
+                    {
+                      "type": "text",
+                      "text": "\n"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Automated with this ",
+                      "style": {
+                        "italic": true
+                      }
+                    },
+                    {
+                      "type": "link",
+                      "url": "https://n8n.skoop.digital/workflow/ijnafLjAgtvP5Qqp?utm_source=n8n-internal&amp;utm_medium=powered_by&amp;utm_campaign=n8n-nodes-base.slack_9210707b971174140595281b7bbb92a444891e11137b3eed14db6c91cb424f1e",
+                      "text": "n8n workflow",
+                      "style": {
+                        "italic": true
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "message_timestamp": "1726876085.851479"
+      }
+    ],
+    "Webhook3": [
+      {
+        "headers": {
+          "host": "n8n.skoop.digital",
+          "user-agent": "SFDC-Callout/61.0",
+          "content-length": "38",
+          "accept": "text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2",
+          "cache-control": "no-cache",
+          "content-type": "application/json",
+          "pragma": "no-cache",
+          "sfdc_stack_depth": "1",
+          "x-forwarded-for": "52.37.187.105",
+          "x-forwarded-host": "n8n.skoop.digital",
+          "x-forwarded-proto": "https",
+          "accept-encoding": "gzip"
+        },
+        "params": {},
+        "query": {},
+        "body": {
+          "opportunityId": "006VW00000ACeS9YAL"
+        },
+        "webhookUrl": "https://n8n.skoop.digital/webhook/c9401b41-936f-46be-8a26-794cc9ceb2e9",
+        "executionMode": "production"
+      }
+    ]
+  }
+}
+```
+
+
+contract status update in salesforce:
+```
+{
+  "meta": {
+    "instanceId": "9210707b971174140595281b7bbb92a444891e11137b3eed14db6c91cb424f1e"
+  },
+  "nodes": [
+    {
+      "parameters": {
+        "resource": "opportunity",
+        "operation": "update",
+        "opportunityId": "={{ $json[\"Id\"] }}",
+        "updateFields": {
+          "customFieldsUi": {
+            "customFieldsValues": [
+              {
+                "fieldId": "API_Updated_Field__c",
+                "value": "=Signed on {{ $now.format('LLL dd, yyyy') }}"
+              },
+              {
+                "fieldId": "skoop_org_id__c"
+              },
+              {
+                "fieldId": "contract_url__c",
+                "value": "={{ $node[\"Webhook1\"].json[\"body\"][\"contract_url\"] }}"
+              }
+            ]
+          }
+        }
+      },
+      "id": "7ec19d68-2418-4466-8ffa-9bb66519ca6b",
+      "name": "updateContractStatus2",
+      "type": "n8n-nodes-base.salesforce",
+      "typeVersion": 1,
+      "position": [
+        940,
+        1500
+      ],
+      "credentials": {
+        "salesforceOAuth2Api": {
+          "id": "5Nrrpw8ruoN61MYg",
+          "name": "Salesforce account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "search",
+        "query": "=SELECT Id, Name, skoop_org_id__c  FROM Opportunity  WHERE skoop_org_id__c = {{ $json[\"body\"][\"organization_id\"] }}"
+      },
+      "id": "9747183f-d8de-4c69-a9ea-9f1b1681add3",
+      "name": "Salesforce",
+      "type": "n8n-nodes-base.salesforce",
+      "typeVersion": 1,
+      "position": [
+        640,
+        1500
+      ],
+      "credentials": {
+        "salesforceOAuth2Api": {
+          "id": "5Nrrpw8ruoN61MYg",
+          "name": "Salesforce account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "2a5e55ae-1be9-466c-8f9a-a6a7391d305e",
+        "options": {}
+      },
+      "id": "3896ccbc-83f1-4fb5-9db8-2df30998847b",
+      "name": "Webhook1",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        380,
+        1500
+      ],
+      "webhookId": "2a5e55ae-1be9-466c-8f9a-a6a7391d305e"
+    }
+  ],
+  "connections": {
+    "Salesforce": {
+      "main": [
+        [
+          {
+            "node": "updateContractStatus2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Salesforce",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}
+
+```
+
+
+Update to existing contract details
+```
+{
+  "meta": {
+    "instanceId": "9210707b971174140595281b7bbb92a444891e11137b3eed14db6c91cb424f1e"
+  },
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "5b2dccbe-480d-430c-a4f1-035e41641370",
+              "leftValue": "={{ $node[\"getOpportunity1\"].json[\"API_Updated_Field__c\"] }}",
+              "rightValue": "Sent on",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "647f401d-191a-438b-92d4-5623dbcff88c",
+      "name": "If",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        840,
+        1760
+      ]
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "opportunityUpdated"
+      },
+      "id": "46290e6e-bbea-4474-a1db-27a850e881d5",
+      "name": "Salesforce Trigger",
+      "type": "n8n-nodes-base.salesforceTrigger",
+      "typeVersion": 1,
+      "position": [
+        380,
+        1760
+      ],
+      "credentials": {
+        "salesforceOAuth2Api": {
+          "id": "5Nrrpw8ruoN61MYg",
+          "name": "Salesforce account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "opportunity",
+        "operation": "get",
+        "opportunityId": "={{ $node[\"Salesforce Trigger\"].json[\"Id\"] }}"
+      },
+      "id": "8bbec41e-de32-4a46-9646-992f8090d114",
+      "name": "getOpportunity1",
+      "type": "n8n-nodes-base.salesforce",
+      "typeVersion": 1,
+      "position": [
+        600,
+        1740
+      ],
+      "credentials": {
+        "salesforceOAuth2Api": {
+          "id": "5Nrrpw8ruoN61MYg",
+          "name": "Salesforce account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "account",
+        "operation": "get",
+        "accountId": "={{ $json.AccountId }}"
+      },
+      "id": "4ee43c4d-859c-462e-a265-13e58192cb44",
+      "name": "getAccount1",
+      "type": "n8n-nodes-base.salesforce",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        1760
+      ],
+      "credentials": {
+        "salesforceOAuth2Api": {
+          "id": "5Nrrpw8ruoN61MYg",
+          "name": "Salesforce account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "contact",
+        "operation": "getAll",
+        "returnAll": true,
+        "options": {
+          "conditionsUi": {
+            "conditionValues": [
+              {
+                "field": "AccountId",
+                "value": "={{ $json.Id }}"
+              }
+            ]
+          }
+        }
+      },
+      "id": "9d682eb0-9756-4ade-b90b-96effe68a207",
+      "name": "GetContacts1",
+      "type": "n8n-nodes-base.salesforce",
+      "typeVersion": 1,
+      "position": [
+        1320,
+        1760
+      ],
+      "credentials": {
+        "salesforceOAuth2Api": {
+          "id": "5Nrrpw8ruoN61MYg",
+          "name": "Salesforce account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "search",
+        "query": "=SELECT Id, FirstName, LastName, Email,\n(SELECT ContactId, Role \n FROM OpportunityContactRoles \n WHERE OpportunityId = '{{ $node[\"getOpportunity1\"].json[\"Id\"] }}')\nFROM Contact\nWHERE Id IN \n(SELECT ContactId \n FROM OpportunityContactRole \n WHERE OpportunityId = '{{ $node[\"getOpportunity1\"].json[\"Id\"] }}')"
+      },
+      "id": "57c2175c-68c9-45b9-92eb-cedbd23274d9",
+      "name": "getRoles1",
+      "type": "n8n-nodes-base.salesforce",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        1780
+      ],
+      "executeOnce": true,
+      "credentials": {
+        "salesforceOAuth2Api": {
+          "id": "5Nrrpw8ruoN61MYg",
+          "name": "Salesforce account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "2cf9ebef-4a3b-42b0-9b1d-e6f100bf5678",
+              "leftValue": "={{ $json.OpportunityContactRoles.records[0].Role }}",
+              "rightValue": "Contract Signer",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "bd9da6a4-926b-4392-afa4-e3dc013073fa",
+      "name": "FilterContractSigner1",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [
+        1800,
+        1760
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "contact",
+        "operation": "get",
+        "contactId": "={{ $json[\"Id\"] }}"
+      },
+      "id": "37ee9b4c-5c8f-4e53-8d13-88382b4984fb",
+      "name": "getContact1",
+      "type": "n8n-nodes-base.salesforce",
+      "typeVersion": 1,
+      "position": [
+        2020,
+        1760
+      ],
+      "executeOnce": true,
+      "credentials": {
+        "salesforceOAuth2Api": {
+          "id": "5Nrrpw8ruoN61MYg",
+          "name": "Salesforce account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "search",
+        "query": "=SELECT Id, Quantity, UnitPrice, Product2.Name \nFROM OpportunityLineItem \nWHERE OpportunityId = '{{ $node[\"getOpportunity1\"].json[\"Id\"] }}'"
+      },
+      "id": "1975d58b-f2d7-4460-adec-6e462152f574",
+      "name": "getPricing1",
+      "type": "n8n-nodes-base.salesforce",
+      "typeVersion": 1,
+      "position": [
+        2240,
+        1760
+      ],
+      "executeOnce": true,
+      "credentials": {
+        "salesforceOAuth2Api": {
+          "id": "5Nrrpw8ruoN61MYg",
+          "name": "Salesforce account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Helper functions\nconst formatCurrency = (value) => `$${value.toFixed(2)}`;\nconst formatPercentage = (value) => `${value.toFixed(2)}%`;\n\n// Get the items from the input\nconst items = $input.all();\n\n// Get the opportunity data\nconst opportunity = $node[\"getOpportunity\"].json;\n\n// Determine if discount is applicable\nconst discountApplicable = opportunity.Discount__c; // Boolean\n\n// Initialize arrays for the table columns\nconst productNames = [];\nconst listPrices = [];\nconst quantities = [];\nconst discounts = [];\nconst promotionalPrices = [];\nconst promotionalDurations = [];\nconst netFixedPrices = [];\nconst netRecurringPrices = [];\n\n// Totals\nlet totalNetFixedPrice = 0;\nlet totalNetRecurringPrice = 0;\nlet promotionalTotalFixedPrice = 0;\nlet promotionalTotalRecurringPrice = 0;\n\n// Flags\nlet hasDiscount = false;\nlet hasPromotionalPrice = false;\n\n// Process each item\nfor (let item of items) {\n  const product = item.json;\n  const productName = product.Product2.Name;\n  const quantity = product.Quantity;\n  const listPrice = product.UnitPrice;\n\n  // Initialize discount and promotional variables\n  let discountPercent = 0;\n  let promotionalPrice = null;\n  let promotionalDuration = null;\n\n  // Apply discount if applicable\n  if (discountApplicable) {\n    // Get discount percentage based on product\n    if (productName === 'Skoop Stick') {\n      discountPercent = opportunity.Skoop_Stick_Per_Unit_Discount__c || 0;\n    } else if (productName === 'Skoop Signage - Pro') {\n      discountPercent = opportunity.Skoop_Signage_Pro_Discount__c || 0;\n    } else if (productName === 'Implementation Fee') {\n      discountPercent = opportunity.Implementation_Fee_Discount__c || 0;\n    } else {\n      discountPercent = 0; // Default if no discount\n    }\n  }\n\n  if (discountPercent > 0) {\n    hasDiscount = true;\n  }\n\n  // Apply discount to list price\n  const discountedPrice = listPrice * (1 - discountPercent / 100);\n\n  // Get promotional price and duration if available\n  promotionalPrice = product.Promotional_Price__c;\n  promotionalDuration = product.Promotional_Duration__c;\n\n  if (promotionalPrice !== null && promotionalPrice !== undefined) {\n    hasPromotionalPrice = true;\n  }\n\n  // After applying discount, apply promotional price if any\n  let netPrice = discountedPrice;\n  if (promotionalPrice !== null && promotionalPrice !== undefined) {\n    netPrice = promotionalPrice;\n  }\n\n  // Determine if product is one-time fee or recurring\n  let isRecurring = true; // Assume recurring\n  if (productName === 'Skoop Stick' || productName === 'Implementation Fee') {\n    isRecurring = false;\n  }\n\n  // Calculate Net Fixed Price and Net Recurring Price\n  let netFixedPrice = 0;\n  let netRecurringPrice = 0;\n\n  if (isRecurring) {\n    netRecurringPrice = netPrice * quantity;\n    totalNetRecurringPrice += discountedPrice * quantity;\n\n    // For promotional totals\n    if (promotionalPrice !== null && promotionalPrice !== undefined) {\n      promotionalTotalRecurringPrice += netPrice * quantity;\n    } else {\n      promotionalTotalRecurringPrice += netRecurringPrice;\n    }\n  } else {\n    netFixedPrice = netPrice * quantity;\n    totalNetFixedPrice += netFixedPrice;\n    promotionalTotalFixedPrice += netFixedPrice;\n  }\n\n  // Push values to arrays\n  productNames.push({ title: productName, font_style: \"Bold\" });\n  listPrices.push({ title: formatCurrency(listPrice), font_style: \"Normal\" });\n  quantities.push({ title: quantity.toString(), font_style: \"Normal\" });\n\n  if (hasDiscount) {\n    discounts.push({ title: formatPercentage(discountPercent), font_style: \"Normal\" });\n  }\n\n  if (hasPromotionalPrice) {\n    promotionalPrices.push({ title: promotionalPrice !== null ? formatCurrency(promotionalPrice) : '', font_style: \"Normal\" });\n    promotionalDurations.push({ title: promotionalDuration ? promotionalDuration.toString() : '', font_style: \"Normal\" });\n  }\n\n  netFixedPrices.push({ title: netFixedPrice > 0 ? formatCurrency(netFixedPrice) : '', font_style: \"Normal\" });\n  netRecurringPrices.push({ title: netRecurringPrice > 0 ? formatCurrency(netRecurringPrice) : '', font_style: \"Normal\" });\n}\n\n// Now add the totals as extra entries in the columns\n\n// Add Totals after promotional period (if promotional prices are used)\nif (hasPromotionalPrice) {\n  // Totals after promotional period\n  productNames.push({ title: \"Totals after promotional period\", font_style: \"Bold\" });\n  listPrices.push({ title: '', font_style: \"Normal\" });\n  quantities.push({ title: '', font_style: \"Normal\" });\n  if (hasDiscount) discounts.push({ title: '', font_style: \"Normal\" });\n  promotionalPrices.push({ title: '', font_style: \"Normal\" });\n  promotionalDurations.push({ title: '', font_style: \"Normal\" });\n  netFixedPrices.push({ title: '', font_style: \"Normal\" });\n  netRecurringPrices.push({ title: formatCurrency(totalNetRecurringPrice), font_style: \"Bold\" });\n\n  // Promotional Total\n  productNames.push({ title: \"Promotional Total\", font_style: \"Bold\" });\n  listPrices.push({ title: '', font_style: \"Normal\" });\n  quantities.push({ title: '', font_style: \"Normal\" });\n  if (hasDiscount) discounts.push({ title: '', font_style: \"Normal\" });\n  promotionalPrices.push({ title: '', font_style: \"Normal\" });\n  promotionalDurations.push({ title: '', font_style: \"Normal\" });\n  netFixedPrices.push({ title: formatCurrency(promotionalTotalFixedPrice), font_style: \"Bold\" });\n  netRecurringPrices.push({ title: formatCurrency(promotionalTotalRecurringPrice), font_style: \"Bold\" });\n} else {\n  // Total\n  productNames.push({ title: \"Total\", font_style: \"Bold\" });\n  listPrices.push({ title: '', font_style: \"Normal\" });\n  quantities.push({ title: '', font_style: \"Normal\" });\n  if (hasDiscount) discounts.push({ title: '', font_style: \"Normal\" });\n  netFixedPrices.push({ title: formatCurrency(totalNetFixedPrice), font_style: \"Bold\" });\n  netRecurringPrices.push({ title: formatCurrency(totalNetRecurringPrice), font_style: \"Bold\" });\n}\n\n// Prepare the final JSON output\nconst pricingBlock = [];\n\n// Product Names\npricingBlock.push({\n  name: \"Products\",\n  list: productNames\n});\n\n// List Prices\npricingBlock.push({\n  name: \"List Price\",\n  list: listPrices\n});\n\n// Quantities\npricingBlock.push({\n  name: \"Quantity\",\n  list: quantities\n});\n\n// Discounts\nif (hasDiscount) {\n  pricingBlock.push({\n    name: \"Discount\",\n    list: discounts\n  });\n}\n\n// Promotional Prices\nif (hasPromotionalPrice) {\n  pricingBlock.push({\n    name: \"Promotional Price\",\n    list: promotionalPrices\n  });\n  pricingBlock.push({\n    name: \"Promotional Duration\",\n    list: promotionalDurations\n  });\n}\n\n// Net Fixed Prices\npricingBlock.push({\n  name: \"Net Fixed Price\",\n  list: netFixedPrices\n});\n\n// Net Recurring Prices\npricingBlock.push({\n  name: \"Net Recurring Price\",\n  list: netRecurringPrices\n});\n\n// Return the pricing block as JSON\nreturn {\n  json: {\n    pricing_block: JSON.stringify(pricingBlock)\n  }\n};\n"
+      },
+      "id": "304df3f3-ca5c-4348-96c3-bb551c5b2677",
+      "name": "formatPricingBlock1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2460,
+        1760
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "0a9f21c2-80d5-44fa-8c93-f21a465237f4",
+      "name": "No Operation, do nothing",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        1980
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://api-v2.skoopsignage.app/settings/update-contract-details/{{ $node[\"getOpportunity1\"].json[\"skoop_org_id__c\"] }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"contract_expiry\": \"2024-10-16T00:00:00Z\",\n  \"payment_terms\": {{ JSON.stringify($node[\"getOpportunity1\"].json[\"Payment_Terms__c\"]) }},\n  \"pricing_block\": \"[{\\\"productName\\\":\\\"Happy Time Cannabis Co- Skoop Signage - Pro\\\",\\\"listPrice\\\":\\\"$54.99\\\",\\\"quantity\\\":\\\"2.00\\\",\\\"discount\\\":\\\"0.00%\\\",\\\"netFixedPrice\\\":\\\"-\\\",\\\"netMonthlyPrice\\\":\\\"$109.98\\\"},{\\\"productName\\\":\\\"Happy Time Cannabis Co- Skoop Signage - Essentials\\\",\\\"listPrice\\\":\\\"$20.00\\\",\\\"quantity\\\":\\\"1.00\\\",\\\"discount\\\":\\\"0.00%\\\",\\\"netFixedPrice\\\":\\\"-\\\",\\\"netMonthlyPrice\\\":\\\"$20.00\\\"},{\\\"productName\\\":\\\"Skoop Stick\\\",\\\"listPrice\\\":\\\"$120\\\",\\\"quantity\\\":\\\"3\\\",\\\"discount\\\":\\\"20.00%\\\",\\\"netFixedPrice\\\":\\\"$288.00\\\",\\\"netMonthlyPrice\\\":\\\"-\\\"},{\\\"productName\\\":\\\"Implementation Fee\\\",\\\"listPrice\\\":\\\"75.00%\\\",\\\"quantity\\\":\\\"$99.00\\\",\\\"discount\\\":\\\"-\\\",\\\"netFixedPrice\\\":\\\"-\\\",\\\"netMonthlyPrice\\\":\\\"-\\\"}]\",\n  \"renewal_term\": {{ JSON.stringify($node[\"getOpportunity1\"].json[\"Renewal_Terms__c\"]) }},\n  \"term\": \"{{ $node[\"getOpportunity1\"].json[\"Term__c\"] }}\"\n}",
+        "options": {}
+      },
+      "id": "d09c09cf-9d6d-4b22-b2c2-2439219cbcfa",
+      "name": "Create Skoop User2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2760,
+        1780
+      ]
+    }
+  ],
+  "connections": {
+    "If": {
+      "main": [
+        [
+          {
+            "node": "getAccount1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Salesforce Trigger": {
+      "main": [
+        [
+          {
+            "node": "getOpportunity1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "getOpportunity1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "getAccount1": {
+      "main": [
+        [
+          {
+            "node": "GetContacts1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetContacts1": {
+      "main": [
+        [
+          {
+            "node": "getRoles1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "getRoles1": {
+      "main": [
+        [
+          {
+            "node": "FilterContractSigner1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FilterContractSigner1": {
+      "main": [
+        [
+          {
+            "node": "getContact1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "getContact1": {
+      "main": [
+        [
+          {
+            "node": "getPricing1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "getPricing1": {
+      "main": [
+        [
+          {
+            "node": "formatPricingBlock1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "formatPricingBlock1": {
+      "main": [
+        [
+          {
+            "node": "Create Skoop User2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}
+
+```
+
+Generate a contract preview and send to salesforce upon request:
+```
+{
+  "meta": {
+    "instanceId": "9210707b971174140595281b7bbb92a444891e11137b3eed14db6c91cb424f1e"
+  },
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "25a99d6c-308d-42e8-b53a-c38870fc2d05",
+              "name": "html",
+              "value": "=<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Skoop Software Platform License Order Form</title>\n    <style>\n        body {\n            font-family: Arial, sans-serif;\n            line-height: 1.6;\n            color: #333;\n            max-width: 800px;\n            margin: 0 auto;\n            padding: 20px;\n        }\n        h1 {\n            color: #444;\n            line-height:1;\n        }\n        .section {\n            margin-bottom: 20px;\n        }\n        .section-header {\n            background-color: #00a99d;\n            color: white;\n            padding: 10px;\n            font-weight: bold;\n        }\n        table {\n            width: 100%;\n            border-collapse: collapse;\n            margin-top: 10px;\n        }\n        th, td {\n            border: 1px solid #ddd;\n            padding: 8px;\n            text-align: left;\n        }\n        th {\n            background-color: #f2f2f2;\n        }\n        a {\n            color: #00a99d;\n            text-decoration: none;\n        }\n        a:hover {\n            text-decoration: underline;\n        }\n        @media (max-width: 600px) {\n            body {\n                padding: 10px;\n            }\n        }\n    </style>\n</head>\n<body>\n    <p style=\"font-size:20px; font-weight:600; line-height:1.25;margin:5px 0px 5px 0px;\">This Software Platform License Order Form is entered into between Skoop, Inc., a Michigan corporation, and the Customer set forth below.</p>\n    \n    <p style=\"line-height:1.25;margin:5px 0px 5px 0px;\">Skoop provides a cloud-based platform and app product that delivers a range of digital signage tools and features (collectively, the \"Software\"),</p>\n    <p style=\"line-height:1.25;margin:5px 0px 5px 0px;\">Accessible at <a href=\"https://skoop.digital\">https://skoop.digital</a> and <a href=\"https://cloud.skoopsignage.com\">https://cloud.skoopsignage.com</a></p>\n\n    <div class=\"section\">\n        <div class=\"section-header\">Customer Details</div>\n        <table>\n            <tr>\n                <td><strong>Client Contact:</strong> {{ $node[\"getContact2\"].json[\"FirstName\"] }} {{ $node[\"getContact2\"].json[\"LastName\"] }}</td>\n                <td><strong>Phone Number:</strong> {{ $node[\"getContact2\"].json[\"Phone\"] }}</td>\n            </tr>\n            <tr>\n                <td><strong>Business Name:</strong> {{ $node[\"getAccount2\"].json[\"Name\"] }}</td>\n                <td><strong>Email:</strong> {{ $node[\"getContact2\"].json[\"Email\"] }}</td>\n            </tr>\n        </table>\n    </div>\n\n    {{ $node[\"formatPricingBlock2\"].json[\"pricing_table\"] }}\n</body>\n</html>",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "535f52fa-8112-4b0d-b510-13e0fc449032",
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2440,
+        2220
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $node[\"Edit Fields\"].json[\"html\"] }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "c93f7067-4d5f-4740-b667-73948b01b3d4",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        2620,
+        2220
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "opportunity",
+        "operation": "get",
+        "opportunityId": "={{ $json[\"body\"][\"id\"] }}"
+      },
+      "id": "5068afdc-a193-4e79-91f7-30693709102e",
+      "name": "getOpportunity2",
+      "type": "n8n-nodes-base.salesforce",
+      "typeVersion": 1,
+      "position": [
+        680,
+        2220
+      ],
+      "credentials": {
+        "salesforceOAuth2Api": {
+          "id": "5Nrrpw8ruoN61MYg",
+          "name": "Salesforce account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "account",
+        "operation": "get",
+        "accountId": "={{ $json.AccountId }}"
+      },
+      "id": "b3708745-ce84-4b66-804e-5228d0d2aec9",
+      "name": "getAccount2",
+      "type": "n8n-nodes-base.salesforce",
+      "typeVersion": 1,
+      "position": [
+        860,
+        2220
+      ],
+      "credentials": {
+        "salesforceOAuth2Api": {
+          "id": "5Nrrpw8ruoN61MYg",
+          "name": "Salesforce account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "contact",
+        "operation": "getAll",
+        "returnAll": true,
+        "options": {
+          "conditionsUi": {
+            "conditionValues": [
+              {
+                "field": "AccountId",
+                "value": "={{ $json.Id }}"
+              }
+            ]
+          }
+        }
+      },
+      "id": "931cbac4-3b6e-4d5a-bc19-40ce4589b965",
+      "name": "GetContacts2",
+      "type": "n8n-nodes-base.salesforce",
+      "typeVersion": 1,
+      "position": [
+        1080,
+        2220
+      ],
+      "credentials": {
+        "salesforceOAuth2Api": {
+          "id": "5Nrrpw8ruoN61MYg",
+          "name": "Salesforce account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "search",
+        "query": "=SELECT Id, FirstName, LastName, Email,\n(SELECT ContactId, Role \n FROM OpportunityContactRoles \n WHERE OpportunityId = '{{ $node[\"getOpportunity2\"].json[\"Id\"] }}')\nFROM Contact\nWHERE Id IN \n(SELECT ContactId \n FROM OpportunityContactRole \n WHERE OpportunityId = '{{ $node[\"getOpportunity2\"].json[\"Id\"] }}')"
+      },
+      "id": "dcfb3cd8-22ee-4f4f-a30e-8db9ed990a65",
+      "name": "getRoles2",
+      "type": "n8n-nodes-base.salesforce",
+      "typeVersion": 1,
+      "position": [
+        1320,
+        2220
+      ],
+      "executeOnce": true,
+      "credentials": {
+        "salesforceOAuth2Api": {
+          "id": "5Nrrpw8ruoN61MYg",
+          "name": "Salesforce account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "2cf9ebef-4a3b-42b0-9b1d-e6f100bf5678",
+              "leftValue": "={{ $json.OpportunityContactRoles.records[0].Role }}",
+              "rightValue": "Contract Signer",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "0a2b3fe4-c5e0-4e63-8346-7a0d46c99560",
+      "name": "FilterContractSigner2",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [
+        1560,
+        2220
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "contact",
+        "operation": "get",
+        "contactId": "={{ $json[\"Id\"] }}"
+      },
+      "id": "cfd92ed3-317d-49b5-b177-1ed70ca6ce9a",
+      "name": "getContact2",
+      "type": "n8n-nodes-base.salesforce",
+      "typeVersion": 1,
+      "position": [
+        1780,
+        2220
+      ],
+      "executeOnce": true,
+      "credentials": {
+        "salesforceOAuth2Api": {
+          "id": "5Nrrpw8ruoN61MYg",
+          "name": "Salesforce account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "search",
+        "query": "=SELECT Id, Quantity, UnitPrice, Product2.Name \nFROM OpportunityLineItem \nWHERE OpportunityId = '{{ $node[\"getOpportunity2\"].json[\"Id\"] }}'"
+      },
+      "id": "9b8acc50-92e0-4658-a536-0b99fa1113c8",
+      "name": "getPricing2",
+      "type": "n8n-nodes-base.salesforce",
+      "typeVersion": 1,
+      "position": [
+        2000,
+        2220
+      ],
+      "executeOnce": true,
+      "credentials": {
+        "salesforceOAuth2Api": {
+          "id": "5Nrrpw8ruoN61MYg",
+          "name": "Salesforce account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Helper functions\nconst formatCurrency = (value) => value > 0 ? `$${value.toFixed(2)}` : '';\nconst formatPercentage = (value) => value > 0 ? `${value.toFixed(2)}%` : '';\nconst formatDate = (dateString) => {\n  const date = new Date(dateString);\n  return date.toLocaleDateString();\n};\n\n// Get the items from the input\nconst items = $input.all();\nconst opportunity = $node[\"getOpportunity2\"].json;\n\n// Extract Contract Details\nconst contractDetails = {\n  term: opportunity.Term__c || 'N/A',\n  renewalTerm: opportunity.Renewal_Terms__c || 'N/A',\n  startDate: opportunity.Start_Date__c ? formatDate(opportunity.Start_Date__c) : 'N/A',\n  paymentTerms: opportunity.Payment_Terms__c || 'N/A',\n  agreementExpiryDate: opportunity.Contract_Expiration_Date__c ? formatDate(opportunity.Contract_Expiration_Date__c) : 'N/A',\n};\n\n// Extract Customer Details\nconst customerDetails = {\n  clientContact: opportunity.Primary_Contact_Name__c || 'N/A',\n  phoneNumber: opportunity.Primary_Contact_Phone__c || 'N/A',\n  businessName: opportunity.Account_Name__c || opportunity.Account?.Name || 'N/A',\n  email: opportunity.Primary_Contact_Email__c || 'N/A',\n};\n\n// Determine if discounts are applicable\nconst discountApplicable = opportunity.Discount__c; // Boolean\n\nlet hasDiscount = false;\nlet hasPromotionalPrice = false;\n\n// Initialize products array\nlet products = [];\n\n// Process line items from Salesforce\nfor (let item of items) {\n  const product = item.json;\n  const productName = product.Product2.Name;\n  const quantity = product.Quantity;\n  const listPrice = product.UnitPrice;\n  const promotionalPrice = product.Promotional_Price__c;\n  const promotionalDuration = product.Promotional_Duration__c;\n  const isRecurring = true; // Assume recurring\n\n  let discountPercent = 0;\n  if (discountApplicable) {\n    // Apply specific discount fields per product if available\n    discountPercent = parseFloat(product.Discount_Percentage__c) || 0; // Use product-specific discount if available\n  }\n\n  if (discountPercent > 0) {\n    hasDiscount = true;\n  }\n\n  if (promotionalPrice !== null && promotionalPrice !== undefined) {\n    hasPromotionalPrice = true;\n  }\n\n  products.push({\n    productName,\n    quantity,\n    listPrice,\n    promotionalPrice,\n    promotionalDuration,\n    isRecurring,\n    discountPercent,\n  });\n}\n\n// Now, add Implementation Fee if applicable\nconst implementationFee = parseFloat(opportunity.Implementation_Fee__c) || 0;\nif (implementationFee > 0) {\n  let discountPercent = 0;\n  if (discountApplicable) {\n    discountPercent = parseFloat(opportunity.Implementation_Fee_Discount__c) || 0;\n  }\n  if (discountPercent > 0) {\n    hasDiscount = true;\n  }\n\n  products.push({\n    productName: 'Implementation Fee',\n    quantity: 1,\n    listPrice: implementationFee,\n    promotionalPrice: null,\n    promotionalDuration: null,\n    isRecurring: false,\n    discountPercent,\n  });\n}\n\n// Add Skoop Stick if applicable\nconst skoopStickUnitCost = parseFloat(opportunity.Skoop_Stick_Per_Unit_Cost__c) || 0;\nconst skoopStickQuantity = parseFloat(opportunity.Skoop_Stick_Quantity__c) || 0;\nif (skoopStickUnitCost > 0 && skoopStickQuantity > 0) {\n  let discountPercent = 0;\n  if (discountApplicable) {\n    discountPercent = parseFloat(opportunity.Skoop_Stick_Per_Unit_Discount__c) || 0;\n  }\n  if (discountPercent > 0) {\n    hasDiscount = true;\n  }\n\n  products.push({\n    productName: 'Skoop Stick',\n    quantity: skoopStickQuantity,\n    listPrice: skoopStickUnitCost,\n    promotionalPrice: null,\n    promotionalDuration: null,\n    isRecurring: false,\n    discountPercent,\n  });\n}\n\n// Add Misc. Product if applicable\nconst miscProductName = opportunity.Misc_Product__c;\nconst miscProductQuantity = parseFloat(opportunity.Misc_Product_Quantity__c) || 0;\nconst miscProductPrice = parseFloat(opportunity.Misc_Product_Price__c) || 0;\nif (miscProductName && miscProductQuantity > 0 && miscProductPrice > 0) {\n  let discountPercent = 0;\n  if (discountApplicable) {\n    discountPercent = parseFloat(opportunity.Misc_Product_Discount__c) || 0;\n  }\n  if (discountPercent > 0) {\n    hasDiscount = true;\n  }\n\n  products.push({\n    productName: miscProductName,\n    quantity: miscProductQuantity,\n    listPrice: miscProductPrice,\n    promotionalPrice: null,\n    promotionalDuration: null,\n    isRecurring: false,\n    discountPercent,\n  });\n}\n\n// Now process each product to calculate net prices and build the table\nlet tableRows = '';\nlet totalNetFixedPrice = 0;\nlet totalNetRecurringPrice = 0;\n\nlet promotionalTotalFixedPrice = 0;\nlet promotionalTotalRecurringPrice = 0;\n\nfor (let product of products) {\n  const { productName, quantity, listPrice, promotionalPrice, promotionalDuration, isRecurring, discountPercent } = product;\n\n  // Apply discount\n  let discountedPrice = listPrice;\n  if (discountPercent > 0) {\n    discountedPrice = listPrice * (1 - discountPercent / 100);\n  }\n\n  // Apply promotional price if applicable\n  let netPrice = discountedPrice;\n  if (promotionalPrice !== null && promotionalPrice !== undefined) {\n    netPrice = promotionalPrice;\n  }\n\n  // Calculate net fixed and recurring prices\n  let netFixedPrice = 0;\n  let netRecurringPrice = 0;\n\n  if (isRecurring) {\n    netRecurringPrice = netPrice * quantity;\n    totalNetRecurringPrice += netRecurringPrice;\n    if (promotionalPrice !== null && promotionalPrice !== undefined) {\n      promotionalTotalRecurringPrice += promotionalPrice * quantity;\n    }\n  } else {\n    netFixedPrice = netPrice * quantity;\n    totalNetFixedPrice += netFixedPrice;\n    if (promotionalPrice !== null && promotionalPrice !== undefined) {\n      promotionalTotalFixedPrice += promotionalPrice * quantity;\n    }\n  }\n\n  // Build the table row\n  tableRows += `\n    <tr>\n      <td>${productName}</td>\n      <td>${formatCurrency(listPrice)}</td>\n      <td>${quantity > 0 ? quantity.toFixed(2) : ''}</td>`;\n  \n  if (hasDiscount) {\n    tableRows += `<td>${formatPercentage(discountPercent)}</td>`;\n  }\n  if (hasPromotionalPrice) {\n    tableRows += `<td>${promotionalPrice !== null ? formatCurrency(promotionalPrice) : ''}</td>`;\n    tableRows += `<td>${promotionalDuration ? promotionalDuration.toString() : ''}</td>`;\n  }\n  tableRows += `<td>${formatCurrency(netFixedPrice)}</td>`;\n  tableRows += `<td>${formatCurrency(netRecurringPrice)}</td>`;\n  tableRows += `</tr>`;\n}\n\n// Build totals row\nlet totalColumns = 5; // Product, List Price, Qty, Net Fixed Price, Net Recurring Price\nif (hasDiscount) totalColumns += 1;\nif (hasPromotionalPrice) totalColumns += 2;\n\n// Calculate the number of empty cells before Net Fixed Price\nlet emptyCells = totalColumns - 2; // Subtract 2 for Net Fixed Price and Net Recurring Price columns\n\n// Build totals row with highlighted style\ntableRows += `<tr class=\"total-row\">\n  <td><strong>Total</strong></td>`;\nfor (let i = 1; i < emptyCells; i++) {\n  tableRows += `<td></td>`;\n}\ntableRows += `<td><strong>${formatCurrency(totalNetFixedPrice)}</strong></td><td><strong>${formatCurrency(totalNetRecurringPrice)}</strong></td>\n</tr>`;\n\n// Add Promotional Total row if applicable\nif (hasPromotionalPrice) {\n  tableRows += `<tr class=\"promotional-total-row\">\n    <td><strong>Promotional Total</strong></td>`;\n  for (let i = 1; i < emptyCells; i++) {\n    tableRows += `<td></td>`;\n  }\n  tableRows += `<td><strong>${formatCurrency(promotionalTotalFixedPrice)}</strong></td><td><strong>${formatCurrency(promotionalTotalRecurringPrice)}</strong></td>\n  </tr>`;\n}\n\n// Build the table header\nlet tableHeader = `\n  <tr>\n    <th>Product</th>\n    <th>List Price</th>\n    <th>Qty</th>`;\nif (hasDiscount) {\n  tableHeader += `<th>Discount</th>`;\n}\nif (hasPromotionalPrice) {\n  tableHeader += `<th>Promotional Price</th>`;\n  tableHeader += `<th>Promotional Duration</th>`;\n}\ntableHeader += `<th>Net Fixed Price</th>\n    <th>Net Recurring Price</th>\n  </tr>`;\n\n// Generate the complete HTML\nconst htmlOutput = `\n  <style>\n    table {\n      width: 100%;\n      border-collapse: collapse;\n    }\n    th, td {\n      border: 1px solid #ddd;\n      padding: 8px;\n      text-align: left;\n    }\n    th {\n      background-color: #f2f2f2;\n    }\n    .total-row, .promotional-total-row {\n      background-color: #f0f0f0;\n      font-weight: bold;\n    }\n    .promotional-total-row {\n      background-color: #e6f3ff;\n    }\n  </style>\n \n  <h2 style=\"font-weight: 700; margin-bottom: 20px;\">Subscription License Terms</h2>\n  <table>\n    <tr>\n      <td><strong>Term:</strong> ${contractDetails.term}</td>\n      <td><strong>Renewal Term:</strong> ${contractDetails.renewalTerm}</td>\n    </tr>\n    <tr>\n      <td><strong>Start Date:</strong> ${contractDetails.startDate}</td>\n      <td><strong>Agreement Expiry Date:</strong> ${contractDetails.agreementExpiryDate}</td>\n    </tr>\n    <tr>\n      <td colspan=\"2\"><strong>Payment Terms:</strong> ${contractDetails.paymentTerms}</td>\n    </tr>\n  </table>\n  \n  <h2 style=\"font-weight: 700; margin-top: 30px; margin-bottom: 20px;\">SKOOP Signage Pricing</h2>\n  <table>\n    <thead>\n      ${tableHeader}\n    </thead>\n    <tbody>\n      ${tableRows}\n    </tbody>\n  </table>\n</div>\n`;\n\nreturn {\n  json: {\n    pricing_table: htmlOutput\n  }\n};"
+      },
+      "id": "26852226-9387-4b1c-a62e-87a495a9e103",
+      "name": "formatPricingBlock2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2220,
+        2220
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "2a5e55ae-1be9-466c-8f9a-a6s8u91d32rn",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "a7f1bb5a-6b05-4b25-989c-222be17ae4f1",
+      "name": "Webhook2",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        380,
+        2220
+      ],
+      "webhookId": "2a5e55ae-1be9-466c-8f9a-a6a7391d305e"
+    }
+  ],
+  "connections": {
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "getOpportunity2": {
+      "main": [
+        [
+          {
+            "node": "getAccount2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "getAccount2": {
+      "main": [
+        [
+          {
+            "node": "GetContacts2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetContacts2": {
+      "main": [
+        [
+          {
+            "node": "getRoles2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "getRoles2": {
+      "main": [
+        [
+          {
+            "node": "FilterContractSigner2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FilterContractSigner2": {
+      "main": [
+        [
+          {
+            "node": "getContact2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "getContact2": {
+      "main": [
+        [
+          {
+            "node": "getPricing2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "getPricing2": {
+      "main": [
+        [
+          {
+            "node": "formatPricingBlock2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "formatPricingBlock2": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook2": {
+      "main": [
+        [
+          {
+            "node": "getOpportunity2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}
+```
+
+
+----------------
+
+write a comprehensive wiki for the skoop contract generation and management app.
+
+fully cover all the details, such as:
+- how salesforce is involved and what fields, layouts, and configurations are involved and what they do.
 - how is the n8n workflow involved. how is the workflow managed or updated. How does the workflow work?
 - what is the pricing logic? how is the pricing table generated?
 - how is the final contract generated stored in aws, and sends th elink back to salesforce and others via email.
 - how does the salesforce app work. how can it be modified. what is ists structure and key files?
-- and anything else helpful.
+- anything else helpful.
+- Don't leave anything out.
+- write it in a way that is easy to understand.
+
+
+
+Output:
+
+-----------------
+
+# Skoop Contract Generation and Management App Wiki
+
+Welcome to the comprehensive guide for the **Skoop Contract Generation and Management App**. This documentation is designed to assist both developers and general users in understanding how the app functions, how it's integrated with Salesforce and n8n, and how to maintain and modify the system.
+
+---
+
+## Table of Contents
+
+1. [Introduction](#introduction)
+2. [Salesforce Integration](#salesforce-integration)
+   - [Custom Fields](#custom-fields)
+   - [Layouts and Configurations](#layouts-and-configurations)
+   - [Lightning Web Components (LWCs)](#lightning-web-components-lwcs)
+3. [n8n Workflow Integration](#n8n-workflow-integration)
+   - [Workflow Overview](#workflow-overview)
+   - [Managing and Updating the Workflow](#managing-and-updating-the-workflow)
+   - [Workflow Logic](#workflow-logic)
+4. [Pricing Logic and Table Generation](#pricing-logic-and-table-generation)
+5. [Contract Generation and Storage](#contract-generation-and-storage)
+   - [AWS S3 Storage](#aws-s3-storage)
+   - [Email Notifications](#email-notifications)
+6. [Salesforce App Structure](#salesforce-app-structure)
+   - [Key Files and Components](#key-files-and-components)
+   - [Modifying the App](#modifying-the-app)
+7. [Usage Guide for Employees](#usage-guide-for-employees)
+8. [Developer Guide](#developer-guide)
+9. [Frequently Asked Questions (FAQs)](#frequently-asked-questions-faqs)
+10. [Appendices](#appendices)
+    - [Appendix A: Data Flow Diagram](#appendix-a-data-flow-diagram)
+    - [Appendix B: Glossary](#appendix-b-glossary)
+
+---
+
+## Introduction
+
+The **Skoop Contract Generation and Management App** is a system designed to streamline the creation, management, and storage of contracts within the Skoop platform. By integrating Salesforce, n8n workflows, and AWS S3 storage, the app automates the generation of contracts based on Opportunity data, manages pricing logic, and ensures that contracts are easily accessible and sent to relevant parties.
+
+---
+
+## Salesforce Integration
+
+graph TD
+    A[Salesforce] --> B[Custom Fields]
+    A --> C[Page Layouts]
+    A --> D[Lightning Web Components]
+    B --> E[Opportunity Object]
+    B --> F[Product Object]
+    D --> G[OpportunityWebhookSection]
+    D --> H[OpportunityWebhookModal]
+
+Salesforce serves as the primary CRM and data source for the contract generation process. The app uses custom fields, layouts, and Lightning Web Components to gather data and interact with users.
+
+### Custom Fields
+
+Several custom fields have been added to the Opportunity and Product objects in Salesforce to store necessary information for contract generation.
+
+#### Opportunity Object
+
+- **API_Updated_Field__c** (Text): Displays the status of the contract (e.g., "Sent on [Date]", "Signed on [Date]").
+- **Implementation_Fee__c** (Currency): Represents the implementation fee amount.
+- **Term__c** (Number): The term length of the contract.
+- **Renewal_Terms__c** (Number): The renewal term length.
+- **Start_Date__c** (Date): The start date of the contract.
+- **Contract_Expiration_Date__c** (Date): The expiration date of the contract.
+- **Payment_Terms__c** (Picklist): The payment terms agreed upon.
+- **Discount__c** (Checkbox): Indicates if a discount is applicable.
+- **Skoop_Stick_Per_Unit_Cost__c** (Currency): Cost per unit of Skoop Stick.
+- **Skoop_Stick_Quantity__c** (Number): Quantity of Skoop Stick units.
+- **Skoop_Stick_Per_Unit_Discount__c** (Percent): Discount percentage for Skoop Stick.
+
+#### Product Object
+
+- **Discount_Percentage__c** (Percent): Discount percentage for the product.
+- **Promotional_Price__c** (Currency): Promotional price for the product.
+- **Promotional_Duration__c** (Number): Duration of the promotional price.
+
+### Layouts and Configurations
+
+The custom fields are added to the Opportunity page layout to allow users to input necessary data. The layout includes sections for:
+
+- **Contract Details**: Fields like Term, Renewal Terms, Start Date, etc.
+- **Pricing Details**: Fields related to discounts, promotional pricing, and product quantities.
+
+### Lightning Web Components (LWCs)
+
+Two main LWCs are involved in the app:
+
+1. **OpportunityWebhookSection**
+
+   - **Purpose**: Displays the "Contract Submission" section on the Opportunity record page.
+   - **Features**:
+     - Shows the status label (e.g., "Status: Sent on [Date]").
+     - Provides a "Preview Contract" button that opens a modal.
+     - Displays the contract URL if available.
+
+2. **OpportunityWebhookModal**
+
+   - **Purpose**: Renders a modal window with a contract preview and handles submission to the webhook.
+   - **Features**:
+     - Displays Opportunity details in the modal.
+     - Contains a "Submit" button to send data to the webhook.
+     - Handles loading states and errors.
+
+---
+
+## n8n Workflow Integration
+
+The **n8n** workflow automation platform orchestrates the logic for contract generation, pricing calculations, and communication between Salesforce and AWS.
+
+### Workflow Overview
+
++-------------------+     +-------------------+     +-------------------+
+|   Event Trigger   |     |   Data Retrieval  |     |      Pricing      |
+|                   | --> |                   | --> |   Calculation     |
+|  Salesforce Event |     | Fetch Opp, Account|     |  Apply Discounts  |
++-------------------+     +-------------------+     +-------------------+
+           |                                                 |
+           |                                                 v
++-------------------+     +-------------------+     +-------------------+
+|      Storage &    |     |     Contract      |     |      Pricing      |
+|   Communication   | <-- |    Generation     | <-- |  Table Generation |
+|  AWS S3 & Emails  |     |  Create HTML Doc  |     |   Format Prices   |
++-------------------+     +-------------------+     +-------------------+
+
+
+The n8n workflow performs the following tasks:
+
+1. **Event Trigger**: Listens for specific events from Salesforce, such as an Opportunity update or a webhook call.
+2. **Data Retrieval**: Fetches necessary data from Salesforce, including Opportunity, Account, Contact, and Product information.
+3. **Pricing Calculation**: Processes the pricing logic based on discounts, promotional prices, and quantities.
+4. **Contract Generation**: Creates an HTML representation of the contract using the fetched data and pricing calculations.
+5. **Storage and Communication**: Stores the generated contract in AWS S3 and sends the contract link back to Salesforce and via email.
+
+### Managing and Updating the Workflow
+
+- **Accessing the Workflow**: The n8n workflow can be accessed and edited through the n8n web interface.
+- **Credentials Management**:
+  - **Salesforce OAuth2 API**: Used to authenticate and fetch data from Salesforce.
+  - **AWS S3 Credentials**: Used to store contracts in AWS S3.
+- **Updating Nodes**: Each node in the workflow represents a specific action. Developers can add, remove, or modify nodes to change functionality.
+- **Testing**: n8n provides tools to test the workflow execution step by step.
+
+### Workflow Logic
+
+The workflow follows this logic:
+
+1. **Webhook Trigger**: Initiated when the "Preview Contract" button is clicked in Salesforce.
+2. **Retrieve Opportunity Data**: Uses the Opportunity ID to fetch Opportunity details.
+3. **Retrieve Related Data**:
+   - **Account Information**: Fetches the associated Account.
+   - **Contact Information**: Identifies the Contract Signer from Contact Roles.
+   - **Product Information**: Gets Opportunity Line Items (products associated with the Opportunity).
+4. **Pricing Calculation**:
+   - Applies discounts and promotional prices where applicable.
+   - Calculates net fixed and recurring prices.
+   - Generates a pricing table in HTML format.
+5. **Contract Generation**:
+   - Combines customer details, contract terms, and the pricing table into an HTML contract template.
+6. **Store Contract in AWS S3**:
+   - Uploads the generated HTML contract to an S3 bucket.
+   - Retrieves a public URL for the contract.
+7. **Update Salesforce**:
+   - Updates the Opportunity's `API_Updated_Field__c` with the status and contract URL.
+8. **Send Email Notification**:
+   - Sends an email to the Contract Signer with the contract link.
+
+---
+
+## Pricing Logic and Table Generation
+
+The pricing logic calculates the final prices for products and generates an HTML pricing table.
+
+### Key Components
+
+- **List Price**: The base price of the product.
+- **Quantity**: Number of units.
+- **Discount**:
+  - **Discount Applicable**: A checkbox indicating if discounts are to be applied.
+  - **Discount Percentage**: Specific discount percentages for products.
+- **Promotional Price**: A special price for a limited duration.
+- **Promotional Duration**: The length of time the promotional price is valid.
+- **Net Fixed Price**: Total price for one-time fees (e.g., implementation fees).
+- **Net Recurring Price**: Total price for recurring fees (e.g., monthly subscriptions).
+
+### Calculation Steps
+
+1. **Apply Discounts**:
+   - If `Discount__c` is true, apply the specified discount percentage to the list price.
+2. **Apply Promotional Prices**:
+   - If a promotional price is provided, it overrides the discounted price.
+3. **Calculate Net Prices**:
+   - **Net Fixed Price**: For non-recurring products, multiply the net price by the quantity.
+   - **Net Recurring Price**: For recurring products, multiply the net price by the quantity.
+4. **Totals**:
+   - Sum up the Net Fixed and Net Recurring prices for all products.
+   - If promotional prices are used, calculate promotional totals.
+
+### HTML Pricing Table Generation
+
+The pricing table is generated using an HTML template that structures the data into a readable format.
+
+- **Table Headers**: Product, List Price, Quantity, Discount, Promotional Price, Net Fixed Price, Net Recurring Price.
+- **Table Rows**: Dynamically generated for each product.
+- **Total Rows**: Display total amounts, highlighted for emphasis.
+
+---
+
+## Contract Generation and Storage
+
+### AWS S3 Storage
+
+After generating the HTML contract, the workflow uploads it to AWS S3:
+
+- **Bucket**: A designated S3 bucket for storing contracts.
+- **File Naming**: Contracts are stored with a unique identifier, typically the Opportunity ID.
+- **Access Control**: Files are set to public-read to allow access via a URL.
+
+### Email Notifications
+
+The workflow sends an email to the Contract Signer with the contract link:
+
+- **Recipient**: The Contact identified as the Contract Signer.
+- **Content**: Includes a message and the URL to the contract.
+- **Sending Service**: AWS SES or another email service integrated into the workflow.
+
+### Updating Salesforce
+
+- **Contract URL**: The public URL from AWS S3 is saved to the `contract_url__c` field on the Opportunity.
+- **Status Update**: The `API_Updated_Field__c` field is updated to reflect the contract has been sent (e.g., "Sent on [Date]").
+
+---
+
+## Salesforce App Structure
+
+### Key Files and Components
+
+force-app/
+├── main/
+    └── default/
+        ├── classes/
+        │   ├── OpportunityWebhookController.cls
+        │   └── OpportunityWebhookController.cls-meta.xml
+        └── lwc/
+            ├── opportunityWebhookSection/
+            │   ├── opportunityWebhookSection.js
+            │   ├── opportunityWebhookSection.html
+            │   └── opportunityWebhookSection.js-meta.xml
+            └── opportunityWebhookModal/
+                ├── opportunityWebhookModal.js
+                ├── opportunityWebhookModal.html
+                └── opportunityWebhookModal.js-meta.xml
+
+- **Apex Classes**:
+  - `OpportunityWebhookController.cls`: Handles the Apex methods exposed to the LWCs.
+- **Lightning Web Components**:
+  - `opportunityWebhookSection`: The main component displayed on the Opportunity record page.
+    - **Files**:
+      - `opportunityWebhookSection.js`
+      - `opportunityWebhookSection.html`
+      - `opportunityWebhookSection.js-meta.xml`
+  - `opportunityWebhookModal`: The modal component for contract preview.
+    - **Files**:
+      - `opportunityWebhookModal.js`
+      - `opportunityWebhookModal.html`
+      - `opportunityWebhookModal.js-meta.xml`
+- **Meta Files**:
+  - XML files defining component visibility and targets.
+
+### Modifying the App
+
+- **Adding Fields**: Custom fields can be added or modified via Salesforce Setup.
+- **Updating LWCs**:
+  - **Logic Changes**: Update the `.js` files for logic modifications.
+  - **Template Changes**: Update the `.html` files for UI changes.
+- **Deploying Changes**:
+  - Use Salesforce CLI commands to deploy updated components.
+  - Ensure proper testing is in place to maintain functionality.
+
+---
+
+## Usage Guide for Employees
+
+**Objective**: To help employees understand how to use the Skoop Contract Generation and Management App within Salesforce.
+
+### Steps to Generate and Send a Contract
+
+sequenceDiagram
+    actor User
+    participant Opp as Opportunity Page
+    participant Modal as Contract Modal
+    participant SF as Salesforce
+    participant n8n as n8n Workflow
+    participant AWS as AWS S3
+    participant Email as Email Service
+
+    User->>Opp: Open Opportunity
+    User->>Opp: Click "Preview Contract"
+    Opp->>Modal: Open Modal
+    Modal->>SF: Fetch Opportunity Data
+    Modal->>n8n: Request Contract Preview
+    n8n->>SF: Fetch Additional Data
+    n8n->>n8n: Generate Contract
+    n8n-->>Modal: Return Preview HTML
+    User->>Modal: Review Contract
+    User->>Modal: Click "Submit"
+    Modal->>n8n: Submit Contract
+    n8n->>AWS: Store Contract
+    n8n->>SF: Update Opportunity
+    n8n->>Email: Send Notification
+    n8n-->>Modal: Confirm Submission
+    Modal-->>User: Show Confirmation
+
+1. **Navigate to the Opportunity**:
+   - Open the Opportunity record for which you want to generate a contract.
+
+2. **View the Contract Submission Section**:
+   - Locate the "Contract Submission" section on the Opportunity page.
+
+3. **Check Contract Status**:
+   - The status label will indicate if a contract has been sent or signed.
+
+4. **Preview the Contract**:
+   - Click on the "Preview Contract" button.
+   - A modal will open, displaying the contract preview.
+
+5. **Submit the Contract**:
+   - If satisfied with the preview, click the "Submit" button within the modal.
+   - The system will send the contract to the Contract Signer and update the Opportunity fields.
+
+6. **Access Contract URL**:
+   - After submission, the `contract_url__c` field will display a link to the contract.
+   - Click the link to view the contract stored in AWS S3.
+
+### Field Definitions
+
+- **API Updated Field**: Shows the current status of the contract.
+- **Contract URL**: Provides a direct link to the generated contract.
+
+---
+
+## Developer Guide
+
+**Objective**: To assist developers in maintaining and extending the Skoop Contract Generation and Management App.
+
+### Development Environment Setup
+
+1. **Salesforce CLI**:
+   - Install the Salesforce CLI for deploying components.
+
+2. **Project Structure**:
+   - Follow the Salesforce DX project structure.
+   - Keep components organized within `force-app/main/default`.
+
+3. **Version Control**:
+   - Use Git for source code management.
+   - Create branches for feature development and bug fixes.
+
+### Key Components and Files
+
+Refer to the [Salesforce App Structure](#salesforce-app-structure) section for detailed information.
+
+### Modifying the Workflow
+
+- **Accessing n8n**: Log in to the n8n instance where the workflow is hosted.
+- **Editing Nodes**:
+  - To change data retrieval logic, modify the corresponding Salesforce nodes.
+  - For pricing logic changes, update the Code nodes containing JavaScript functions.
+- **Testing Changes**:
+  - Use n8n's execution preview to test workflow changes.
+  - Monitor the output at each node to ensure correct behavior.
+
+### Deploying Changes
+
+- **Salesforce Components**:
+  - Use the following command to deploy:
+
+    ```bash
+    sf project deploy start --source-dir force-app
+    ```
+
+- **n8n Workflow**:
+  - Deploy changes directly through the n8n web interface.
+  - Ensure that any credentials used are correctly configured.
+
+### Best Practices
+
+- **Code Quality**: Maintain clean and well-documented code.
+- **Error Handling**: Implement robust error handling in both LWCs and n8n workflow.
+- **Testing**:
+  - Write Apex tests for controller methods.
+  - Perform end-to-end testing for workflow changes.
+
+---
+
+## Frequently Asked Questions (FAQs)
+
+**Q1: Can I customize the fields displayed in the contract preview?**
+
+- **A**: Yes, developers can modify the `opportunityWebhookModal` LWC to change which fields are displayed.
+
+**Q2: How do I update the pricing logic if we change our pricing model?**
+
+- **A**: Developers can update the JavaScript code within the n8n workflow's Code nodes responsible for pricing calculations.
+
+**Q3: What happens if the contract fails to generate?**
+
+- **A**: The system will display an error message in Salesforce, and the Opportunity fields will not be updated. Check the n8n workflow logs for error details.
+
+---
+
+## Appendices
+
+### Appendix A: Data Flow Diagram
+
+```plaintext
++----------------------+                 +----------------+                 +----------------+
+|                      |                 |                |                 |                |
+|   Salesforce         |  Webhook Call   |      n8n       | AWS S3 Storage  |    Email       |
+|                      +---------------> |                +---------------> |                |
+|  (Opportunity Page)  |                 |  (Workflow)    |                 |  (Contract     |
+|                      |                 |                |                 |  Signer)       |
++----------------------+                 +----------------+                 +----------------+
+```
+
+### Appendix B: Glossary
+
+- **LWC**: Lightning Web Component, a modern framework for building Salesforce UI components.
+- **n8n**: An open-source workflow automation tool.
+- **AWS S3**: Amazon Simple Storage Service, used for storing contracts.
+- **Apex**: A strongly typed, object-oriented programming language used on the Salesforce platform.
+
+---
+
