@@ -50,9 +50,9 @@ export default class OpportunityWebhookSection extends LightningElement {
         return `Status: ${apiUpdated}`;
     }
 
-    //get apiUpdatedField() {
-        //return this.opportunityData ? getFieldValue(this.opportunityData, API_UPDATED_FIELD) : '';
-    //}
+    get apiUpdatedField() {
+        return this.opportunityData ? getFieldValue(this.opportunityData, API_UPDATED_FIELD) : '';
+    }
 
     get contractUrl() {
         return this.opportunityData ? getFieldValue(this.opportunityData, CONTRACT_URL_FIELD) : '';
