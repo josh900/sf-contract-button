@@ -9,6 +9,7 @@ import ACCOUNTID_FIELD from '@salesforce/schema/Opportunity.AccountId';
 import PROBABILITY_FIELD from '@salesforce/schema/Opportunity.Probability';
 import API_UPDATED_FIELD from '@salesforce/schema/Opportunity.API_Updated_Field__c';
 import CONTRACT_URL_FIELD from '@salesforce/schema/Opportunity.contract_url__c';
+import CONTRACT_HISTORY_FIELD from '@salesforce/schema/Opportunity.Contract_History__c';
 
 export default class OpportunityWebhookSection extends LightningElement {
     @api recordId; // This is the opportunity ID
@@ -16,10 +17,21 @@ export default class OpportunityWebhookSection extends LightningElement {
     error;
     isLoading = true;
     opportunityData;
+    isStatusModalOpen = false; // Variable to control the status modal
 
     @wire(getRecord, { 
         recordId: '$recordId', 
-        fields: [NAME_FIELD, AMOUNT_FIELD, CLOSEDATE_FIELD, STAGENAME_FIELD, ACCOUNTID_FIELD, PROBABILITY_FIELD, API_UPDATED_FIELD, CONTRACT_URL_FIELD] 
+        fields: [
+            NAME_FIELD, 
+            AMOUNT_FIELD, 
+            CLOSEDATE_FIELD, 
+            STAGENAME_FIELD, 
+            ACCOUNTID_FIELD, 
+            PROBABILITY_FIELD, 
+            API_UPDATED_FIELD, 
+            CONTRACT_URL_FIELD,
+            CONTRACT_HISTORY_FIELD // Added field
+        ] 
     })
     wiredOpportunity({ error, data }) {
         if (data) {
@@ -34,7 +46,8 @@ export default class OpportunityWebhookSection extends LightningElement {
     }
 
     get statusLabel() {
-        return 'Status: ';
+        const apiUpdated = this.apiUpdatedField;
+        return `Status: ${apiUpdated}`;
     }
 
     get apiUpdatedField() {
@@ -43,6 +56,10 @@ export default class OpportunityWebhookSection extends LightningElement {
 
     get contractUrl() {
         return this.opportunityData ? getFieldValue(this.opportunityData, CONTRACT_URL_FIELD) : '';
+    }
+
+    get contractHistory() {
+        return this.opportunityData ? getFieldValue(this.opportunityData, CONTRACT_HISTORY_FIELD) : '';
     }
 
     get opportunityFields() {
@@ -89,5 +106,15 @@ export default class OpportunityWebhookSection extends LightningElement {
         } catch (error) {
             console.error('Error opening modal:', JSON.stringify(error));
         }
+    }
+
+    // Method to handle click on the status field
+    handleStatusClick() {
+        this.isStatusModalOpen = true;
+    }
+
+    // Method to close the status modal
+    closeStatusModal() {
+        this.isStatusModalOpen = false;
     }
 }
